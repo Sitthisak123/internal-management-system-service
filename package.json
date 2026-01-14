@@ -1,0 +1,21 @@
+{
+  "name": "internal-management-system-service",
+  "version": "1.0.0",
+  "description": "",
+  "license": "ISC",
+  "author": "",
+  "type": "module",
+  "main": "service.js",
+  "scripts": {
+    "test": "node --watch server.js"
+  },
+  "dependencies": {
+    "@prisma/adapter-pg": "^7.2.0",
+    "@prisma/client": "^7.2.0",
+    "fastify": "^5.6.2",
+    "pg": "^8.16.3"
+  },
+  "devDependencies": {
+    "prisma": "^7.2.0"
+  }
+}
