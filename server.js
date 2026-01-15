@@ -1,18 +1,23 @@
-// Import the framework and instantiate it
+import 'dotenv/config'
 import Fastify from 'fastify'
-const fastify = Fastify({
+import prismaPlugin from './src/utils/prismaPlugin.ts'
+
+const app = Fastify({
   logger: true
 })
+app.register(prismaPlugin)
 
 // Declare a route
-fastify.get('/', async function handler (request, reply) {
-  return { hello: 'world' }
+app.get('/', async function handler(request, reply) {
+  const users = await app.prisma.user.findFirst()
+
+  return { hello: 'world', users }
 })
 
 // Run the server!
 try {
-  await fastify.listen({ port: 3000 })
+  await app.listen({ port: 3000 })
 } catch (err) {
-  fastify.log.error(err)
+  app.log.error(err)
   process.exit(1)
 }
