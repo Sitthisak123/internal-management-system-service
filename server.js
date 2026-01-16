@@ -1,11 +1,9 @@
 import 'dotenv/config'
 import Fastify from 'fastify'
-import prismaPlugin from './src/utils/prismaPlugin.ts'
 
 const app = Fastify({
   logger: true
 })
-app.register(prismaPlugin)
 
 // Declare a route
 app.get('/', async function handler(request, reply) {
