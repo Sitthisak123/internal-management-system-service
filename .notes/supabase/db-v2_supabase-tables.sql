@@ -5,6 +5,7 @@ CREATE TABLE "personnel" (
   "fullname" text NOT NULL,
   "position" text NOT NULL,
   "created_at" timestamptz DEFAULT now()
+  "status" smallint NOT NULL DEFAULT 0, -- -2=onleave, -1=suspend, 0=unauth, 1=active
 );
 
 -- 2. ตาราง Profiles (เชื่อมกับ auth.users ของ Supabase)
@@ -13,8 +14,7 @@ CREATE TABLE "profiles" (
   "id" uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   "username" text,
   "title" text,
-  "role" smallint NOT NULL DEFAULT 0, -- 0=user, 1=admin
-  "status" smallint NOT NULL DEFAULT 0, -- -1=suspend, 0=unauth, 1=active
+  -- "role" smallint NOT NULL DEFAULT 0, -- 0=admin, 1=superadmin
   "personnel_id" bigint REFERENCES "personnel"("id"), -- เชื่อมกับพนักงาน
   "created_at" timestamptz DEFAULT now(),
   "updated_at" timestamptz DEFAULT now(),
