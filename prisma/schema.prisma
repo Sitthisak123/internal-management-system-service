@@ -1,104 +1,98 @@
 generator client {
-  provider   = "prisma-client"
-  output     = "./generated"
+  provider = "prisma-client"
+  output   = "./generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
 }
 
-model User {
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model material {
+  id                Int                 @id @default(autoincrement())
+  title             String
+  material_type_id  Int
+  unit              String
+  quantity          Int                 @default(0)
+  created_at        DateTime            @default(now()) @db.Timestamptz(6)
+  updated_at        DateTime            @default(now()) @db.Timestamptz(6)
+  material_type     material_type       @relation(fields: [material_type_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  mr_form_materials mr_form_materials[]
+
+  @@index([material_type_id], map: "idx_material_material_type_id")
+}
+
+model material_type {
+  id         Int        @id @default(autoincrement())
+  title      String
+  created_at DateTime   @default(now()) @db.Timestamptz(6)
+  updated_at DateTime   @default(now()) @db.Timestamptz(6)
+  material   material[]
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model mr_form {
+  id                                 Int                 @id @default(autoincrement())
+  ref_no                             String              @unique
+  subject                            String
+  description                        String?
+  purpose                            String?
+  status                             Int                 @default(0) @db.SmallInt
+  form_date                          DateTime            @default(now()) @db.Timestamptz(6)
+  created_at                         DateTime            @default(now()) @db.Timestamptz(6)
+  updated_at                         DateTime            @default(now()) @db.Timestamptz(6)
+  creator_id                         Int
+  owner_id                           Int
+  authorizer_id                      Int?
+  users_mr_form_authorizer_idTousers users?              @relation("mr_form_authorizer_idTousers", fields: [authorizer_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users_mr_form_creator_idTousers    users               @relation("mr_form_creator_idTousers", fields: [creator_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  personnel                          personnel           @relation(fields: [owner_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  mr_form_materials                  mr_form_materials[]
+
+  @@index([authorizer_id], map: "idx_mr_form_authorizer_id")
+  @@index([creator_id], map: "idx_mr_form_creator_id")
+  @@index([owner_id], map: "idx_mr_form_owner_id")
+  @@index([status], map: "idx_mr_form_status")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model mr_form_materials {
   id          Int      @id @default(autoincrement())
-  username    String   @db.VarChar
-  hashPwd     String   @map("hash_pwd") @db.VarChar
-  title       String   @db.VarChar
-  role        Int      @default(0) @db.SmallInt // 0=user, 1=admin
-  status      Int      @default(0) @db.SmallInt // -1=suspend, 0=unauth, 1=active
-  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamp(6)
-  updatedAt   DateTime @default(now()) @updatedAt @map("update_at") @db.Timestamp(6)
-  email       String   @unique @db.VarChar
-  personnelId Int      @unique @map("personel_id")
+  mr_form_id  Int
+  material_id Int
+  quantity    Int
+  material    material @relation(fields: [material_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  mr_form     mr_form  @relation(fields: [mr_form_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
-  // Relations
-  personnel       Personnel @relation(fields: [personnelId], references: [id])
-  authorizedForms MrForm[]  @relation("MrFormAuthorizer")
-  createdForms    MrForm[]  @relation("MrFormCreator")
-
-  @@map("users")
+  @@unique([mr_form_id, material_id])
+  @@index([mr_form_id], map: "idx_mrfm_form_id")
+  @@index([material_id], map: "idx_mrfm_material_id")
 }
 
-model Personnel {
-  id       Int    @id @default(autoincrement())
-  fullname String @db.VarChar
-  position String @db.VarChar
-
-  // Relations
-  user       User?
-  ownedForms MrForm[]
-
-  @@map("porsonel")
+model personnel {
+  id       Int       @id @default(autoincrement())
+  fullname String
+  position String
+  mr_form  mr_form[]
+  users    users[]
 }
 
-model MaterialType {
-  id        Int      @id @default(autoincrement())
-  title     String   @db.VarChar
-  createdAt DateTime @default(now()) @map("created_at") @db.Timestamp(6)
-  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamp(6)
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model users {
+  id                                   Int       @id @default(autoincrement())
+  username                             String    @unique
+  hash_pwd                             String
+  title                                String
+  email                                String    @unique
+  personnel_id                         Int
+  role                                 Int       @default(0) @db.SmallInt
+  status                               Int       @default(0) @db.SmallInt
+  created_at                           DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at                           DateTime  @default(now()) @db.Timestamptz(6)
+  mr_form_mr_form_authorizer_idTousers mr_form[] @relation("mr_form_authorizer_idTousers")
+  mr_form_mr_form_creator_idTousers    mr_form[] @relation("mr_form_creator_idTousers")
+  personnel                            personnel @relation(fields: [personnel_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
-  // Relations
-  materials Material[]
-
-  @@map("material_type")
-}
-
-model Material {
-  id             Int       @id @default(autoincrement())
-  title          String    @db.VarChar
-  materialTypeId Int       @map("material_type_id")
-  quantity       Int       @default(0)
-  unit           String    @db.VarChar
-  createdAt      DateTime? @default(now()) @map("created_at") @db.Timestamp(6)
-  updatedAt      DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamp(6)
-
-  // Relations
-  type        MaterialType      @relation(fields: [materialTypeId], references: [id])
-  formLinks   MrFormMaterials[]
-
-  @@map("material")
-}
-
-model MrForm {
-  id             Int      @id @default(autoincrement())
-  descripts      String?  @db.VarChar
-  authorizerId   Int      @map("authorizer_id")
-  materialsCount Int?     @map("materials") // Mapped to distinguish from the relation below
-  creatorId      Int      @map("creator_id")
-  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamp(6)
-  updatedAt      DateTime @default(now()) @updatedAt @map("update_at") @db.Timestamp(6)
-  date           DateTime @db.Timestamp(6)
-  subject        String   @db.VarChar
-  refNo          String   @map("ref_no") @db.VarChar
-  ownerId        Int      @map("owner")
-  owingTo        String?  @map("owing_to") @db.VarChar
-
-  // Relations
-  authorizer User              @relation("MrFormAuthorizer", fields: [authorizerId], references: [id])
-  creator    User              @relation("MrFormCreator", fields: [creatorId], references: [id])
-  owner      Personnel         @relation(fields: [ownerId], references: [id])
-  materials  MrFormMaterials[]
-
-  @@map("mr_form")
-}
-
-model MrFormMaterials {
-  id         Int @id @default(autoincrement())
-  mrFormId   Int @map("mr_form_id")
-  materialId Int @map("material_id")
-  quantity   Int
-
-  // Relations
-  mrForm   MrForm   @relation(fields: [mrFormId], references: [id])
-  material Material @relation(fields: [materialId], references: [id])
-
-  @@map("mr_form_materials")
+  @@index([personnel_id], map: "idx_users_personnel_id")
 }
