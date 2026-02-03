@@ -1,31 +1,29 @@
-import 'dotenv/config'
-import express from 'express'
-import createprismaClient from './utils/db.js'
+import 'dotenv/config';
+import express from 'express';
+import cors from 'cors';
+import createPrismaClient from './utils/db.js';
 
-const prisma = createprismaClient()
-const app = express()
-app.use(express.json())
+import authRoutes from './routes/auth.routes.js';
+import userRoutes from './routes/user.routes.js';
+import personnelRoutes from './routes/personnel.routes.js';
+import materialRoutes from './routes/material.routes.js';
+import requisitionRoutes from './routes/requisition.routes.js';
 
-app.get('/test', async (req, res) => {
-  try {
-    const status = await prisma.personnel.create({
-      data: {
-        fullname: "John Doe",
-        position: "Software Engineer",
-      },
-    })
-    res.json(status)
-  } catch (e: any) {
-    if (e.code === 'P2002') {
-      return res.status(400).json({ error: `Duplicate ${e.meta.driverAdapterError.cause.constraint.fields.join(', ')} detected on ${e.meta.modelName}` })
-    } else {
-      console.error(e)
-    }
-    res.status(500).json({ error: String(e) })
-  }
-})
+const prisma = createPrismaClient();
+const app = express();
 
-app.listen(3000, async () => {
-  await prisma.$connect()
-  console.log('🚀 Server ready at http://localhost:3000')
-})
+app.use(cors());
+app.use(express.json());
+
+app.use('/api/auth', authRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/personnel', personnelRoutes);
+app.use('/api/materials', materialRoutes);
+app.use('/api/requisitions', requisitionRoutes);
+
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, async () => {
+  await prisma.$connect();
+  console.log(`Server ready at http://localhost:${PORT}`);
+});
