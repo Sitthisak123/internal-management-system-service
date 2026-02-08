@@ -1,7 +1,6 @@
 import createPrismaClient from '../src/utils/db';
 import bcrypt from 'bcryptjs';
 
-
 const prisma = createPrismaClient();
 
 async function createAdmin() {
@@ -20,23 +19,24 @@ async function createAdmin() {
             console.log('User already exists.');
             return;
         }
-        //Bcrypt hashing here
-        const hashedPassword = await bcrypt.hash(password, 10);
 
+        // Bcrypt hashing here
+        const hashedPassword = await bcrypt.hash(password, 10);
 
         console.log('Creating admin user...');
 
-        // Note: Passwords are currently stored in plain text based on authService.ts.
-        // Once bcrypt is implemented, ensure this script hashes the password before storing.
         await prisma.users.create({
             data: {
                 username,
                 hash_pwd: hashedPassword,
                 email,
                 title: 'Administrator',
-                role: 1,
-                status: 1,
-                personnel: { create: { fullname: 'System Admin', position: 'Administrator' } }
+                role: 1,   // 1 = Superadmin
+                status: 1, // 1 = Active
+                
+                // FIX: These fields are now directly in the users table
+                fullname: 'System Admin', 
+                position: 'System Administrator' 
             },
         });
 

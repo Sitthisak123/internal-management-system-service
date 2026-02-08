@@ -1,6 +1,13 @@
 import { Router } from 'express';
-import { getAllRequisitions, getRequisitionById, createRequisition, updateRequisition, deleteRequisition } from '../controllers/requisition.controller.js';
-import { authenticateToken } from '../middleware/auth.middleware.js';
+// Note: In TS, you usually don't need the .js extension in imports unless you have a specific config
+import { 
+  getAllRequisitions, 
+  getRequisitionById, 
+  createRequisition, 
+  updateRequisition, 
+  deleteRequisition 
+} from '../controllers/requisition.controller'; 
+import { authenticateToken } from '../middleware/auth.middleware';
 
 const router = Router();
 

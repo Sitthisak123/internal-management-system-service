@@ -22,6 +22,9 @@ app.use('/api/materials', materialRoutes);
 app.use('/api/requisitions', requisitionRoutes);
 
 const PORT = process.env.PORT || 3000;
+app.get('/', (req, res) => {
+  res.send('Hello World!');
+});
 
 app.listen(PORT, async () => {
   await prisma.$connect();
