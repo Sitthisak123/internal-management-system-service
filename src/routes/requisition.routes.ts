@@ -5,12 +5,18 @@ import {
   getRequisitionById, 
   createRequisition, 
   updateRequisition, 
-  deleteRequisition 
+  deleteRequisition,
+  getRequisitionVolume,
+  getCountFilteredByStatus,
+  getRecentActivities
 } from '../controllers/requisition.controller'; 
 import { authenticateToken } from '../middleware/auth.middleware';
 
 const router = Router();
 
+router.get('/volume', authenticateToken, getRequisitionVolume);
+router.get('/recentActivities', authenticateToken, getRecentActivities);
+router.get('/statusCount/:status', authenticateToken, getCountFilteredByStatus);
 router.get('/', authenticateToken, getAllRequisitions);
 router.get('/:id', authenticateToken, getRequisitionById);
 router.post('/', authenticateToken, createRequisition);

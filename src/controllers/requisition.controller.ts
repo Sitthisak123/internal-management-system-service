@@ -27,6 +27,76 @@ const mapToCleanRequisition = (req: any) => {
   };
 };
 
+export const getRecentActivities = async (req: Request, res: Response) => {
+  try {
+    const recentActivities = await prisma.mr_form.findMany({
+      orderBy: { created_at: 'desc' },
+      take: 4,
+      include: {
+        users_mr_form_creator_idTousers: { select: userSelect },
+        personnel: { select: userSelect }, // FIX: Use 'personnel'
+        users_mr_form_authorizer_idTousers: { select: userSelect },
+        mr_form_materials: {
+          include: { material: true },
+        },
+      },
+    });
+
+    const cleanActivities = recentActivities.map(mapToCleanRequisition);
+
+    res.json({ recentActivities: cleanActivities });
+  } catch (error) {
+    console.error("Error getting recent activities:", error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+}
+
+export const getCountFilteredByStatus = async (req: Request, res: Response) => {
+  try {
+    const { status } = req.params;
+    const RequisitionsCountByStatus = await prisma.mr_form.count({
+      where: { status: Number(status) },
+    });
+
+    res.json({ count: RequisitionsCountByStatus });
+  } catch (error) {
+    console.error("Error getting requisitions count:", error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+export const getFilteredByStatus = async (req: Request, res: Response) => {
+  try {
+    const { status } = req.params;
+    const rawRequisitions = await prisma.mr_form.findMany({
+      where: { status: Number(status) },
+      orderBy: { created_at: 'desc' },
+      include: {
+        // Correct generated name for Creator
+        users_mr_form_creator_idTousers: { select: userSelect },
+        
+        // FIX: The schema named this relation 'personnel'
+        personnel: { select: userSelect },
+        
+        // Correct generated name for Authorizer
+        users_mr_form_authorizer_idTousers: { select: userSelect },
+        
+        mr_form_materials: {
+          include: { material: true },
+        },
+      },
+    });
+
+    // Clean the data before sending
+    const cleanRequisitions = rawRequisitions.map(mapToCleanRequisition);
+
+    res.json(cleanRequisitions);
+  } catch (error) {
+    console.error("Error getting requisitions:", error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
 export const getAllRequisitions = async (req: Request, res: Response) => {
   try {
     const rawRequisitions = await prisma.mr_form.findMany({
@@ -187,15 +257,184 @@ export const updateRequisition = async (req: Request, res: Response) => {
   }
 };
 
+
+
 export const deleteRequisition = async (req: Request, res: Response) => {
+
   const { id } = req.params;
+
   try {
+
     await prisma.mr_form.delete({
+
       where: { id: Number(id) },
+
     });
+
     res.status(204).send();
+
   } catch (error) {
+
     console.error("Error deleting requisition:", error);
+
     res.status(500).json({ message: 'Internal server error' });
+
   }
+
 };
+
+
+
+
+
+
+
+export const getRequisitionVolume = async (req: Request, res: Response) => {
+
+
+
+  try {
+
+
+
+    const { months } = req.query;
+
+
+
+    const monthlyData = [];
+
+
+
+    let monthOffsets = [0, 1, 2, 3]; // Default to last 4 months
+
+
+
+
+
+
+
+    if (months && typeof months === 'string') {
+
+
+
+      monthOffsets = months.split(',').map(m => Math.abs(parseInt(m, 10))).filter(m => !isNaN(m));
+
+
+
+    }
+
+
+
+    
+
+
+
+    const today = new Date();
+
+
+
+
+
+
+
+    for (const offset of monthOffsets) {
+
+
+
+      const targetMonth = new Date(today.getFullYear(), today.getMonth() - offset, 1);
+
+
+
+      const monthName = targetMonth.toLocaleString('default', { month: 'short' });
+
+
+
+      
+
+
+
+      const startDate = new Date(targetMonth.getFullYear(), targetMonth.getMonth(), 1);
+
+
+
+      const endDate = new Date(targetMonth.getFullYear(), targetMonth.getMonth() + 1, 0);
+
+
+
+
+
+
+
+      const count = await prisma.mr_form.count({
+
+
+
+        where: {
+
+
+
+          created_at: {
+
+
+
+            gte: startDate,
+
+
+
+            lt: endDate,
+
+
+
+          },
+
+
+
+        },
+
+
+
+      });
+
+
+
+
+
+
+
+      monthlyData.push({ name: monthName, value: count });
+
+
+
+    }
+
+
+
+
+
+
+
+    res.json(monthlyData.reverse()); // To have the oldest month first
+
+
+
+  } catch (error) {
+
+
+
+    console.error("Error getting requisition volume:", error);
+
+
+
+    res.status(500).json({ message: 'Internal server error' });
+
+
+
+  }
+
+
+
+};
+
+
+
+

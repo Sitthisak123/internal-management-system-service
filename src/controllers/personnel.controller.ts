@@ -6,7 +6,7 @@ const prisma = createPrismaClient();
 export const getAllPersonnel = async (req: Request, res: Response) => {
   try {
     console.log("Fetching all personnel (users)...");
-    
+
     // Now querying 'users' table directly. 
     // We select specific fields to avoid returning the password hash.
     const personnelList = await prisma.users.findMany({
@@ -19,7 +19,7 @@ export const getAllPersonnel = async (req: Request, res: Response) => {
         role: true,
         status: true,
         username: true,
-        // hash_pwd: false // Implicitly excluded
+        // hash_pwd: false //critical info // Implicitly excluded
       },
       orderBy: {
         id: 'asc',
@@ -32,6 +32,17 @@ export const getAllPersonnel = async (req: Request, res: Response) => {
     res.status(500).json({ message: 'Internal server error' });
   }
 };
+
+export const getPersonnelCount = async (req: Request, res: Response) => {
+  try {
+    const count = await prisma.users.count();
+    res.json({ count });
+  } catch (error) {
+    console.error("Error fetching personnel count:", error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
 
 export const getPersonnelById = async (req: Request, res: Response) => {
   const { id } = req.params;
@@ -67,7 +78,7 @@ export const createPersonnel = async (req: Request, res: Response) => {
   try {
     // NOTE: req.body must now contain all required user fields:
     // username, hash_pwd, email, title, fullname, position
-    
+
     const personnel = await prisma.users.create({
       data: req.body,
       select: {
@@ -77,7 +88,7 @@ export const createPersonnel = async (req: Request, res: Response) => {
         email: true
       }
     });
-    
+
     res.status(201).json(personnel);
   } catch (error) {
     console.error("Error creating personnel:", error);
