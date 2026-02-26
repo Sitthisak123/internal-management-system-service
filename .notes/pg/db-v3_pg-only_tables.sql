@@ -5,7 +5,7 @@
 CREATE TABLE users (
   id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
   username TEXT NOT NULL UNIQUE,
-  hash_pwd TEXT NOT NULL,
+  hash_pwd TEXT,
   display_name TEXT NOT NULL,
   fullname TEXT NOT NULL UNIQUE, -- Moved from personnel
   position TEXT NOT NULL,        -- Moved from personnel
@@ -17,7 +17,7 @@ CREATE TABLE users (
   CONSTRAINT chk_users_role CHECK (role IN (-1,0,1)), 
   
   status SMALLINT NOT NULL DEFAULT 0,
-  CONSTRAINT chk_users_status CHECK (status IN (-1,0,1)), -- -1=suspend, 0=unauth, 1=active
+  CONSTRAINT chk_users_status CHECK (status IN (-1,0,1)), -- -1=suspend/onleave, 0=unauth/inactive, 1=active
   
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()

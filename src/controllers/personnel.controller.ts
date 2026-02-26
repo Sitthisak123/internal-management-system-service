@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import createPrismaClient from '../utils/db'; // Removed .ts extension for standard import
+import { equal } from 'node:assert';
 
 const prisma = createPrismaClient();
 
@@ -8,6 +9,9 @@ export const getAllPersonnel = async (req: Request, res: Response) => {
     // Now querying 'users' table directly. 
     // We select specific fields to avoid returning the password hash.
     const personnelList = await prisma.users.findMany({
+      where: {
+        role: -1 // Filter for personnel (role = -1)
+      },
       select: {
         id: true,
         fullname: true,
@@ -76,13 +80,11 @@ export const createPersonnel = async (req: Request, res: Response) => {
   try {
     // NOTE: req.body must now contain all required user fields:
     // username, hash_pwd, email, display_name, fullname, position
-
     const personnel = await prisma.users.create({
       data: req.body,
       select: {
         id: true,
         fullname: true,
-        display_name: true,
         username: true,
         email: true,
         role: true
