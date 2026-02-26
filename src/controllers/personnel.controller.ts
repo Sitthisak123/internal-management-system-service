@@ -5,8 +5,6 @@ const prisma = createPrismaClient();
 
 export const getAllPersonnel = async (req: Request, res: Response) => {
   try {
-    console.log("Fetching all personnel (users)...");
-
     // Now querying 'users' table directly. 
     // We select specific fields to avoid returning the password hash.
     const personnelList = await prisma.users.findMany({
@@ -15,7 +13,7 @@ export const getAllPersonnel = async (req: Request, res: Response) => {
         fullname: true,
         position: true,
         email: true,
-        title: true,
+        display_name: true,
         role: true,
         status: true,
         username: true,
@@ -54,7 +52,7 @@ export const getPersonnelById = async (req: Request, res: Response) => {
         fullname: true,
         position: true,
         email: true,
-        title: true,
+        display_name: true,
         role: true,
         status: true,
         username: true,
@@ -77,15 +75,17 @@ export const getPersonnelById = async (req: Request, res: Response) => {
 export const createPersonnel = async (req: Request, res: Response) => {
   try {
     // NOTE: req.body must now contain all required user fields:
-    // username, hash_pwd, email, title, fullname, position
+    // username, hash_pwd, email, display_name, fullname, position
 
     const personnel = await prisma.users.create({
       data: req.body,
       select: {
         id: true,
         fullname: true,
+        display_name: true,
         username: true,
-        email: true
+        email: true,
+        role: true
       }
     });
 

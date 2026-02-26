@@ -6,7 +6,7 @@ CREATE TABLE users (
   id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
   username TEXT NOT NULL UNIQUE,
   hash_pwd TEXT NOT NULL,
-  title TEXT NOT NULL,
+  display_name TEXT NOT NULL,
   fullname TEXT NOT NULL UNIQUE, -- Moved from personnel
   position TEXT NOT NULL,        -- Moved from personnel
   email TEXT NOT NULL UNIQUE,

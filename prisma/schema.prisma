@@ -74,12 +74,12 @@ model users {
   id                                   Int       @id @default(autoincrement())
   username                             String    @unique
   hash_pwd                             String
-  title                                String
-  fullname                             String    @unique
-  position                             String
-  email                                String    @unique
+  display_name                                String                                     // Display name
+  fullname                             String    @unique                          // full name
+  position                             String                                     // job title
+  email                                String    @unique                          // email address   
   role                                 Int       @default(0) @db.SmallInt
-  status                               Int       @default(0) @db.SmallInt
+  status                               Int       @default(0) @db.SmallInt         // -1=Inactive, 0=Active
   created_at                           DateTime  @default(now()) @db.Timestamptz(6)
   updated_at                           DateTime  @default(now()) @db.Timestamptz(6)
   mr_form_mr_form_authorizer_idTousers mr_form[] @relation("mr_form_authorizer_idTousers")

@@ -9,7 +9,7 @@ const userSelect = {
   fullname: true,
   email: true,
   position: true,
-  title: true
+  display_name: true,
 };
 
 // 2. Helper to rename the messy Prisma fields to clean ones for the Frontend

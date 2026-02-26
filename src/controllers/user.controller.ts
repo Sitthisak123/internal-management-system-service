@@ -31,14 +31,14 @@ export const getUserById = async (req: Request, res: Response) => {
 };
 
 export const createUser = async (req: Request, res: Response) => {
-  const { username, password, title, fullname, position, email, role, status } = req.body;
+  const { username, password, display_name, fullname, position, email, role, status } = req.body;
   try {
     const hash_pwd = await bcrypt.hash(password, 10);
     const newUser = await prisma.users.create({
       data: {
         username,
         hash_pwd,
-        title,
+        display_name,
         fullname,
         position,
         email,
@@ -55,11 +55,11 @@ export const createUser = async (req: Request, res: Response) => {
 
 export const updateUser = async (req: Request, res: Response) => {
   const { id } = req.params;
-  const { username, title, fullname, position, email, role, status, password } = req.body;
+  const { username, display_name, fullname, position, email, role, status, password } = req.body;
   try {
     const data: any = {
       username,
-      title,
+      display_name,
       fullname,
       position,
       email,

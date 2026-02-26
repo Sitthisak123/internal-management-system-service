@@ -55,7 +55,6 @@ export const getMaterialDistribution = async (req: Request, res: Response) => {
       material_type: materialTypeToName(c.material_type_id, materialTypes),
       count: c._count.id,
     }));
-    console.log(mappedCount);
 
     res.json({ mappedCount });
   } catch (error) {

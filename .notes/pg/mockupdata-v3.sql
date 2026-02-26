@@ -1,7 +1,7 @@
 -- =========================
 -- 1. INSERT USERS (Merged with Personnel info)
 -- =========================
-INSERT INTO users (username, hash_pwd, title, fullname, position, email, role, status) VALUES
+INSERT INTO users (username, hash_pwd, display_name, fullname, position, email, role, status) VALUES
 ('somchai.j', '$2b$10$mockhash1', 'Mr.', 'Somchai Jaidee', 'Warehouse Officer', 'somchai.j@company.com', 1, 1),
 ('anong.s', '$2b$10$mockhash2', 'Ms.', 'Anong Srisuk', 'Procurement Officer', 'anong.s@company.com', 0, 1),
 ('kittipong.m', '$2b$10$mockhash3', 'Mr.', 'Kittipong Manee', 'Maintenance Technician', 'kittipong.m@company.com', 0, 1),

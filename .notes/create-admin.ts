@@ -30,7 +30,7 @@ async function createAdmin() {
                 username,
                 hash_pwd: hashedPassword,
                 email,
-                title: 'Administrator',
+                display_name: 'Administrator',
                 role: 1,   // 1 = Superadmin
                 status: 1, // 1 = Active
                 

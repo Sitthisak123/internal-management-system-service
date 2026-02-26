@@ -81,7 +81,7 @@ export const getMe = async (req: Request, res: Response) => {
         id: true,
         username: true,
         email: true,
-        title: true,
+        display_name: true,
         fullname: true,
         position: true,
         role: true,
