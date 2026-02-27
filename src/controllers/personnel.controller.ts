@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
-import createPrismaClient from '../utils/db'; // Removed .ts extension for standard import
+import createPrismaClient, { withAuditLog } from '../utils/db'; // Removed .ts extension for standard import
 import { equal } from 'node:assert';
+import { stat } from 'node:fs';
 
 const prisma = createPrismaClient();
 
@@ -79,14 +80,19 @@ export const getPersonnelById = async (req: Request, res: Response) => {
 export const createPersonnel = async (req: Request, res: Response) => {
   try {
     // NOTE: req.body must now contain all required user fields:
-    // username, hash_pwd, email, display_name, fullname, position
+    // email, fullname, position
+    console.log("Creating personnel with data:", req.body);
     const personnel = await prisma.users.create({
-      data: req.body,
+      data: {
+        fullname: req.body.fullname,
+        position: req.body.position,
+        status: 0, // Default to inactive until further action (e.g., account setup)
+        role: -1, // Personnel role
+        email: req.body.email || null, // Allow null if email is not provided
+      },
       select: {
         id: true,
         fullname: true,
-        username: true,
-        email: true,
         role: true
       }
     });
@@ -122,13 +128,19 @@ export const updatePersonnel = async (req: Request, res: Response) => {
 
 export const deletePersonnel = async (req: Request, res: Response) => {
   const { id } = req.params;
+  const userId = (req as any).user?.id; // Assuming auth middleware sets this
+  const note = req.body?.note || 'Deleted via API';
   try {
-    await prisma.users.delete({
-      where: { id: Number(id) },
+    // Use the reusable method!
+    await withAuditLog(prisma, userId, note, async (tx) => {
+      await tx.users.delete({
+        where: { id: Number(id) },
+      });
     });
+
     res.status(204).send();
   } catch (error) {
-    console.error("Error deleting personnel:", error);
+    console.error("Error deleting User:", error);
     res.status(500).json({ message: 'Internal server error' });
   }
 };

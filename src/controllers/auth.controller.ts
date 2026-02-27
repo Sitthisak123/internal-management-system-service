@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import createPrismaClient from '../utils/db'; // Removed .ts extension
+import createPrismaClient, { withAuditLog } from '../utils/db'; // Removed .ts extension
 
 const prisma = createPrismaClient();
 

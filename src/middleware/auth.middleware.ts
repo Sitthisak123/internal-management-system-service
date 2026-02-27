@@ -13,6 +13,7 @@ export const authenticateToken = (req: Request, res: Response, next: NextFunctio
     if (err) {
       return res.sendStatus(403);
     }
+    console.log('Authenticated user:', user);
     (req as any).user = user;
     next();
   });

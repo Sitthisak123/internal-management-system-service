@@ -4,12 +4,12 @@
 -- Merged with personnel fields (fullname, position)
 CREATE TABLE users (
   id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-  username TEXT NOT NULL UNIQUE,
+  username TEXT UNIQUE DEFAULT NULL, -- Nullable for personnel-only records
   hash_pwd TEXT,
-  display_name TEXT NOT NULL,
+  display_name TEXT DEFAULT NULL, -- Optional for personnel-only records
   fullname TEXT NOT NULL UNIQUE, -- Moved from personnel
   position TEXT NOT NULL,        -- Moved from personnel
-  email TEXT NOT NULL UNIQUE,
+  email TEXT UNIQUE DEFAULT NULL, -- Nullable for personnel-only records
 
   -- Role & Status with Named Constraints
   role SMALLINT NOT NULL DEFAULT 0,
@@ -42,6 +42,7 @@ CREATE TABLE material (
   title TEXT NOT NULL,
   material_type_id INTEGER NOT NULL REFERENCES material_type(id),
   unit TEXT NOT NULL, 
+  minimum_threshold INTEGER DEFAULT NULL,
   
   quantity INTEGER NOT NULL DEFAULT 0,
   CONSTRAINT chk_material_qty CHECK (quantity >= 0), 

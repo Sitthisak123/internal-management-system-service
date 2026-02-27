@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import createPrismaClient from '../utils/db.ts'
+import createPrismaClient, { withAuditLog } from '../utils/db.ts'
 import bcrypt from 'bcryptjs';
 
 const prisma = createPrismaClient();

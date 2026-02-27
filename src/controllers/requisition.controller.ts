@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import createPrismaClient from '../utils/db'; 
+import createPrismaClient, { withAuditLog } from '../utils/db';
 
 const prisma = createPrismaClient();
 
@@ -19,7 +19,7 @@ const mapToCleanRequisition = (req: any) => {
     creator: req.users_mr_form_creator_idTousers,       // Rename generated name -> creator
     owner: req.personnel,                               // Rename 'personnel' -> owner
     authorizer: req.users_mr_form_authorizer_idTousers, // Rename generated name -> authorizer
-    
+
     // Remove the original keys so they don't clutter the response
     users_mr_form_creator_idTousers: undefined,
     personnel: undefined,
@@ -74,13 +74,13 @@ export const getFilteredByStatus = async (req: Request, res: Response) => {
       include: {
         // Correct generated name for Creator
         users_mr_form_creator_idTousers: { select: userSelect },
-        
+
         // FIX: The schema named this relation 'personnel'
         personnel: { select: userSelect },
-        
+
         // Correct generated name for Authorizer
         users_mr_form_authorizer_idTousers: { select: userSelect },
-        
+
         mr_form_materials: {
           include: { material: true },
         },
@@ -104,13 +104,13 @@ export const getAllRequisitions = async (req: Request, res: Response) => {
       include: {
         // Correct generated name for Creator
         users_mr_form_creator_idTousers: { select: userSelect },
-        
+
         // FIX: The schema named this relation 'personnel'
         personnel: { select: userSelect },
-        
+
         // Correct generated name for Authorizer
         users_mr_form_authorizer_idTousers: { select: userSelect },
-        
+
         mr_form_materials: {
           include: { material: true },
         },
@@ -141,7 +141,7 @@ export const getRequisitionById = async (req: Request, res: Response) => {
         },
       },
     });
-    
+
     if (rawRequisition) {
       res.json(mapToCleanRequisition(rawRequisition));
     } else {
@@ -154,16 +154,16 @@ export const getRequisitionById = async (req: Request, res: Response) => {
 };
 
 export const createRequisition = async (req: Request, res: Response) => {
-  const { 
-    subject, 
-    description, 
-    purpose, 
-    form_date, 
-    owner_id, 
-    items 
+  const {
+    subject,
+    description,
+    purpose,
+    form_date,
+    owner_id,
+    items
   } = req.body;
-  
-  const creator_id = (req as any).user?.id; 
+
+  const creator_id = (req as any).user?.id;
 
   if (!creator_id) {
     return res.status(401).json({ message: "Unauthorized: Creator ID missing" });
@@ -193,7 +193,7 @@ export const createRequisition = async (req: Request, res: Response) => {
         mr_form_materials: true
       }
     });
-    
+
     res.status(201).json(requisition);
   } catch (error) {
     console.error("Error creating requisition:", error);
@@ -203,13 +203,13 @@ export const createRequisition = async (req: Request, res: Response) => {
 
 export const updateRequisition = async (req: Request, res: Response) => {
   const { id } = req.params;
-  const { 
-    subject, 
-    description, 
-    purpose, 
-    form_date, 
-    owner_id, 
-    status, 
+  const {
+    subject,
+    description,
+    purpose,
+    form_date,
+    owner_id,
+    status,
     items,
     authorizer_id
   } = req.body;
@@ -232,7 +232,7 @@ export const updateRequisition = async (req: Request, res: Response) => {
           owner_id: owner_id ? Number(owner_id) : undefined,
           status: status !== undefined ? Number(status) : undefined,
           authorizer_id: authorizer_id ? Number(authorizer_id) : undefined,
-          
+
           mr_form_materials: {
             create: items.map((item: any) => ({
               material_id: Number(item.material_id),
@@ -242,7 +242,7 @@ export const updateRequisition = async (req: Request, res: Response) => {
         },
         include: {
           mr_form_materials: {
-             include: { material: true }
+            include: { material: true }
           }
         }
       });
@@ -257,182 +257,54 @@ export const updateRequisition = async (req: Request, res: Response) => {
   }
 };
 
-
-
 export const deleteRequisition = async (req: Request, res: Response) => {
-
   const { id } = req.params;
+  const userId = (req as any).user?.id;
+  const note = req.body?.note || 'MR Form deleted via API';
 
   try {
-
-    await prisma.mr_form.delete({
-
-      where: { id: Number(id) },
-
+    await withAuditLog(prisma, userId, note, async (tx) => {
+      await tx.mr_form.delete({
+        where: { id: Number(id) },
+      });
     });
 
     res.status(204).send();
-
   } catch (error) {
-
     console.error("Error deleting requisition:", error);
-
     res.status(500).json({ message: 'Internal server error' });
-
   }
-
 };
 
-
-
-
-
-
-
 export const getRequisitionVolume = async (req: Request, res: Response) => {
-
-
-
   try {
-
-
-
     const { months } = req.query;
-
-
-
     const monthlyData = [];
-
-
-
     let monthOffsets = [0, 1, 2, 3]; // Default to last 4 months
-
-
-
-
-
-
-
     if (months && typeof months === 'string') {
-
-
-
       monthOffsets = months.split(',').map(m => Math.abs(parseInt(m, 10))).filter(m => !isNaN(m));
-
-
-
     }
-
-
-
-    
-
-
-
     const today = new Date();
-
-
-
-
-
-
-
     for (const offset of monthOffsets) {
-
-
-
       const targetMonth = new Date(today.getFullYear(), today.getMonth() - offset, 1);
-
-
-
       const monthName = targetMonth.toLocaleString('default', { month: 'short' });
-
-
-
-      
-
-
-
       const startDate = new Date(targetMonth.getFullYear(), targetMonth.getMonth(), 1);
-
-
-
       const endDate = new Date(targetMonth.getFullYear(), targetMonth.getMonth() + 1, 0);
-
-
-
-
-
-
-
       const count = await prisma.mr_form.count({
-
-
-
         where: {
-
-
-
           created_at: {
-
-
-
             gte: startDate,
-
-
-
             lt: endDate,
-
-
-
           },
-
-
-
         },
-
-
-
       });
-
-
-
-
-
-
-
       monthlyData.push({ name: monthName, value: count });
-
-
-
     }
-
-
-
-
-
-
-
     res.json(monthlyData.reverse()); // To have the oldest month first
-
-
-
   } catch (error) {
-
-
-
     console.error("Error getting requisition volume:", error);
-
-
-
     res.status(500).json({ message: 'Internal server error' });
-
-
-
   }
-
-
-
 };
 
 

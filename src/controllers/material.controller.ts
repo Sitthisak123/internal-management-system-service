@@ -1,7 +1,7 @@
 import { material } from './../../prisma/generated/prisma/client';
 import { material_type } from './../../prisma/generated/prisma/browser';
 import { Request, Response } from 'express';
-import createPrismaClient from '../utils/db.ts'
+import createPrismaClient, { withAuditLog } from '../utils/db.ts'
 
 const prisma = createPrismaClient();
 function materialTypeToName(materialTypeId: number, materialTypes: material_type[]): string{
@@ -92,13 +92,20 @@ export const updateMaterial = async (req: Request, res: Response) => {
 
 export const deleteMaterial = async (req: Request, res: Response) => {
   const { id } = req.params;
+  const userId = (req as any).user?.id;
+  const note = req.body?.note || 'Deleted via API';
+
   try {
-    await prisma.material.delete({
-      where: { id: Number(id) },
+    // Use the reusable method!
+    await withAuditLog(prisma, userId, note, async (tx) => {
+      await tx.material.delete({
+        where: { id: Number(id) },
+      });
     });
+
     res.status(204).send();
   } catch (error) {
-    console.error(error);
+    console.error("Error deleting material:", error);
     res.status(500).json({ message: 'Internal server error' });
   }
 };

@@ -13,6 +13,7 @@ model material {
   title             String
   material_type_id  Int
   unit              String
+  minimum_threshold Int?
   quantity          Int                 @default(0)
   created_at        DateTime            @default(now()) @db.Timestamptz(6)
   updated_at        DateTime            @default(now()) @db.Timestamptz(6)
@@ -72,18 +73,35 @@ model mr_form_materials {
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 model users {
-  id                                   Int       @id @default(autoincrement())
-  username                             String    @unique
+  id                                   Int        @id @default(autoincrement())
+  username                             String?    @unique
   hash_pwd                             String?
-  display_name                         String
-  fullname                             String    @unique
+  display_name                         String?
+  fullname                             String     @unique
   position                             String
-  email                                String    @unique
-  role                                 Int       @default(0) @db.SmallInt
-  status                               Int       @default(0) @db.SmallInt
-  created_at                           DateTime  @default(now()) @db.Timestamptz(6)
-  updated_at                           DateTime  @default(now()) @db.Timestamptz(6)
-  mr_form_mr_form_authorizer_idTousers mr_form[] @relation("mr_form_authorizer_idTousers")
-  mr_form_mr_form_creator_idTousers    mr_form[] @relation("mr_form_creator_idTousers")
+  email                                String?    @unique
+  role                                 Int        @default(0) @db.SmallInt
+  status                               Int        @default(0) @db.SmallInt
+  created_at                           DateTime   @default(now()) @db.Timestamptz(6)
+  updated_at                           DateTime   @default(now()) @db.Timestamptz(6)
+  del_logs                             del_logs[]
+  mr_form_mr_form_authorizer_idTousers mr_form[]  @relation("mr_form_authorizer_idTousers")
+  mr_form_mr_form_creator_idTousers    mr_form[]  @relation("mr_form_creator_idTousers")
   mr_form                              mr_form[]
+}
+
+model del_logs {
+  id             BigInt     @id @default(autoincrement())
+  table_name     String
+  record         Json
+  deleted_by     Int?
+  note           String?
+  effected_by    BigInt?
+  created_at     DateTime   @default(now()) @db.Timestamptz(6)
+  users          users?     @relation(fields: [deleted_by], references: [id], onUpdate: NoAction)
+  del_logs       del_logs?  @relation("del_logsTodel_logs", fields: [effected_by], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  other_del_logs del_logs[] @relation("del_logsTodel_logs")
+
+  @@index([effected_by], map: "idx_del_logs_effected_by")
+  @@index([table_name], map: "idx_del_logs_table_name")
 }

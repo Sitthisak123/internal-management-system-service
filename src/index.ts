@@ -7,6 +7,7 @@ import authRoutes from './routes/auth.routes.js';
 import userRoutes from './routes/user.routes.js';
 import personnelRoutes from './routes/personnel.routes.js';
 import materialRoutes from './routes/material.routes.js';
+import materialTypeRoutes from './routes/material_type.routes.js';
 import requisitionRoutes from './routes/requisition.routes.js';
 
 const prisma = createPrismaClient();
@@ -20,6 +21,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/personnel', personnelRoutes);
 app.use('/api/materials', materialRoutes);
 app.use('/api/requisitions', requisitionRoutes);
+app.use('/api/material-types', materialTypeRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.get('/', (req, res) => {
