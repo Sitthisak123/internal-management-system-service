@@ -10,7 +10,7 @@ CREATE TABLE users (
   fullname TEXT NOT NULL UNIQUE, -- Moved from personnel
   position TEXT NOT NULL,        -- Moved from personnel
   email TEXT UNIQUE DEFAULT NULL, -- Nullable for personnel-only records
-
+  create_by INTEGER REFERENCES users(id) ON DELETE SET NULL, -- Self-referencing for creator (can be NULL for initial records)
   -- Role & Status with Named Constraints
   role SMALLINT NOT NULL DEFAULT 0,
   -- -1=personnel (only records/no login), 0=admin/user, 1=superadmin
@@ -88,7 +88,7 @@ CREATE INDEX idx_mr_form_status ON mr_form(status);
 CREATE TABLE mr_form_materials (
   id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
   mr_form_id INTEGER NOT NULL REFERENCES mr_form(id) ON DELETE CASCADE,
-  material_id INTEGER NOT NULL REFERENCES material(id),
+  material_id INTEGER NOT NULL REFERENCES material(id) ON DELETE CASCADE,
   
   quantity INTEGER NOT NULL,
   CONSTRAINT chk_mrfm_qty CHECK (quantity > 0), 

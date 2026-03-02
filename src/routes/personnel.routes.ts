@@ -5,7 +5,8 @@ import {
     createPersonnel,
     updatePersonnel,
     deletePersonnel,
-    getPersonnelCount
+    getPersonnelCount,
+    getPersonnelByStatus
 } from '../controllers/personnel.controller.js';
 import { authenticateToken } from '../middleware/auth.middleware.js';
 
@@ -17,5 +18,6 @@ router.get('/:id', authenticateToken, getPersonnelById);
 router.post('/', authenticateToken, createPersonnel);
 router.put('/:id', authenticateToken, updatePersonnel);
 router.delete('/:id', authenticateToken, deletePersonnel);
+router.get('/status/:status', authenticateToken, getPersonnelByStatus);
 
 export default router;

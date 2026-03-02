@@ -3,17 +3,23 @@ import { Pool } from 'pg'
 import { PrismaPg } from '@prisma/adapter-pg'
 import { PrismaClient } from '../../prisma/generated/prisma/client'
 
-export default function createPrismaClient() {
+let prismaClient: PrismaClient | null = null;
+
+export default function createPrismaClient(): PrismaClient {
+    if (prismaClient) {
+        return prismaClient;
+    }
+    
     try {
         const connectionString = process.env.DATABASE_URL!
         const pool = new Pool({ connectionString, ssl: { rejectUnauthorized: false } })
         const adapter = new PrismaPg(pool)
-        const prisma = new PrismaClient({ adapter }) // ⭐ จำเป็นใน v7
-        return prisma
+        prismaClient = new PrismaClient({ adapter }) // ⭐ จำเป็นใน v7
+        return prismaClient
     } catch (error) {
         console.error('Failed to create Prisma Client:', error)
+        throw error; // Re-throw the error instead of returning false
     }
-    return false
 }
 
 /**

@@ -1,7 +1,9 @@
 import 'dotenv/config';
+import 'reflect-metadata';
 import express from 'express';
 import cors from 'cors';
 import createPrismaClient from './utils/db.js';
+import setupGraphQL from './routes/graphQL.routes.js';
 
 import authRoutes from './routes/auth.routes.js';
 import userRoutes from './routes/user.routes.js';
@@ -28,7 +30,25 @@ app.get('/', (req, res) => {
   res.send('Hello World!');
 });
 
-app.listen(PORT, async () => {
-  await prisma.$connect();
-  console.log(`Server ready at http://localhost:${PORT}`);
-});
+// Initialize and start server
+const startServer = async () => {
+  try {
+    // Connect Prisma
+    await prisma.$connect();
+    console.log('✓ Prisma connected');
+
+    // Setup GraphQL Apollo Server
+    const apolloServer = await setupGraphQL(app);
+    console.log(`✓ Apollo Server ready at http://localhost:${PORT}/graphql`);
+
+    // Start Express server
+    app.listen(PORT, () => {
+      console.log(`✓ Server ready at http://localhost:${PORT}`);
+    });
+  } catch (error) {
+    console.error('Failed to start server:', error);
+    process.exit(1);
+  }
+};
+
+startServer();

@@ -77,6 +77,36 @@ export const getPersonnelById = async (req: Request, res: Response) => {
   }
 };
 
+export const getPersonnelByStatus = async (req: Request, res: Response) => {
+  const { status } = req.params;
+  try {
+    const personnel = await prisma.users.findMany({
+      where: { status: Number(status) },
+      select: {
+        id: true,
+        fullname: true,
+        position: true,
+        email: false,
+        display_name: true,
+        role: true,
+        status: true,
+        username: false,
+        created_at: true,
+        updated_at: true
+      }
+    });
+
+    if (personnel) {
+      res.json(personnel);
+    } else {
+      res.status(404).json({ message: 'Personnel not found' });
+    }
+  } catch (error) {
+    console.error("Error fetching personnel by ID:", error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
 export const createPersonnel = async (req: Request, res: Response) => {
   try {
     // NOTE: req.body must now contain all required user fields:

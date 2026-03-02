@@ -9,14 +9,20 @@
     "addadmin": "tsx .notes/create-admin.ts"
   },
   "dependencies": {
+    "@apollo/server": "^5.4.0",
     "@prisma/adapter-pg": "7.0.0",
     "@prisma/client": "^7.3.0",
     "bcrypt": "^6.0.0",
     "bcryptjs": "^3.0.3",
+    "class-validator": "^0.15.1",
     "cors": "^2.8.6",
     "express": "5.1.0",
+    "graphql": "^16.13.0",
+    "graphql-scalars": "^1.25.0",
     "jsonwebtoken": "^9.0.3",
-    "pg": "^8.17.2"
+    "pg": "^8.17.2",
+    "reflect-metadata": "^0.2.2",
+    "type-graphql": "^2.0.0-rc.3"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
