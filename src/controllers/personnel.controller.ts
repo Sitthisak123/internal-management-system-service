@@ -11,7 +11,7 @@ export const getAllPersonnel = async (req: Request, res: Response) => {
     // We select specific fields to avoid returning the password hash.
     const personnelList = await prisma.users.findMany({
       where: {
-        role: -1 // Filter for personnel (role = -1)
+        status: { not: -1 },// Filter for personnel (role = -1)
       },
       select: {
         id: true,

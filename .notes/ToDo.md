@@ -7,10 +7,13 @@
 - delation:
     <!-- - Inventory (Materials) -->
     <!-- - req forms -->
-    - User
+    <!-- - User -->
 
 - edit:
-    - Requisitions
+    <!-- - Requisitions -->
+    - ALL table
+        - update_at
+        - update logs
 
 - UI:
     - Global Search: (later)

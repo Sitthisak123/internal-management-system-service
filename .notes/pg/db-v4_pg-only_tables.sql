@@ -73,6 +73,7 @@ CREATE TABLE mr_form (
   form_date TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  evaluated_at TIMESTAMPTZ, -- Nullable: Only filled when evaluated (approved/rejected)
   
   -- Relationships
   creator_id INTEGER NOT NULL REFERENCES users(id),    -- The person typing/submitting
