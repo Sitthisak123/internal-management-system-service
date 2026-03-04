@@ -25,7 +25,16 @@
         * Form Validate font/back end
         * Filter Search   
         * Material Eval on Accept
-        
+    - Users:
+        * Action button > View, Edit 
+        * 
+    - CreateUser:
+        * 
+        * 
+    - EditUser:
+        * 
+        * 
+
 
 -Errs-Fallback:
     -Api fallback

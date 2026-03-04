@@ -10,7 +10,6 @@ CREATE TABLE users (
   fullname TEXT NOT NULL UNIQUE, -- Moved from personnel
   position TEXT NOT NULL,        -- Moved from personnel
   email TEXT UNIQUE DEFAULT NULL, -- Nullable for personnel-only records
-  create_by INTEGER REFERENCES users(id) ON DELETE SET NULL, -- Self-referencing for creator (can be NULL for initial records)
   -- Role & Status with Named Constraints
   role SMALLINT NOT NULL DEFAULT 0,
   -- -1=personnel (only records/no login), 0=admin/user, 1=superadmin
@@ -19,9 +18,13 @@ CREATE TABLE users (
   status SMALLINT NOT NULL DEFAULT 0,
   CONSTRAINT chk_users_status CHECK (status IN (-1,0,1)), -- -1=suspend/onleave, 0=unauth/inactive, 1=active
   
+  created_by INTEGER REFERENCES users(id) ON DELETE SET NULL, -- Self-referencing for creator (can be NULL for initial records)
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+CREATE INDEX idx_users_created_by ON users(created_by);
+
 
 -- =========================
 -- TABLE: material_type

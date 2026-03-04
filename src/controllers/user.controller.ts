@@ -19,13 +19,28 @@ export const getUserById = async (req: Request, res: Response) => {
   const { id } = req.params;
   try {
     const user = await prisma.users.findUnique({
-      where: { id: Number(id) },
+      where: {
+        id: Number(id)
+      },
+      include: {
+        created_by_user: {
+          select: {
+            id: true,
+            display_name: true,
+            fullname: true,
+            position: true,
+            role: true,
+            status: true,
+          }
+        }
+      },
     });
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
     res.json(user);
   } catch (error) {
+    console.error(error);
     res.status(500).json({ error: 'Failed to fetch user' });
   }
 };
@@ -83,12 +98,18 @@ export const updateUser = async (req: Request, res: Response) => {
 
 export const deleteUser = async (req: Request, res: Response) => {
   const { id } = req.params;
+  const userId = (req as any).user?.id; // Get the ID of the user performing the deletion
+  console.log(`User ${userId} is attempting to delete user ${id}`);
+  const note = req.body?.note || `Deleted user via API`; // Note for the audit log
   try {
-    await prisma.users.delete({
-      where: { id: Number(id) },
+    await withAuditLog(prisma, userId, note, async (tx) => {
+      await tx.users.delete({
+        where: { id: Number(id) },
+      });
     });
     res.json({ message: 'User deleted successfully' });
   } catch (error) {
+    console.error(error);
     res.status(500).json({ error: 'Failed to delete user' });
   }
 };
