@@ -18,7 +18,7 @@ CREATE TABLE users (
   status SMALLINT NOT NULL DEFAULT 0,
   CONSTRAINT chk_users_status CHECK (status IN (-1,0,1)), -- -1=suspend/onleave, 0=unauth/inactive, 1=active
   
-  created_by INTEGER REFERENCES users(id) ON DELETE SET NULL, -- Self-referencing for creator (can be NULL for initial records)
+  created_by INTEGER REFERENCES users(id), -- Self-referencing for creator (can be NULL for initial records)
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );

@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "test": "tsx watch src/index.ts",
-    "addadmin": "tsx .notes/create-admin.ts"
+    "addadmin": "tsx .notes/create-admin.ts",
+    "DBreset": "npx prisma migrate reset --force && npx prisma db execute --file \".notes\\pg\\db-v4_pg-only_tables.sql\" && npx prisma db execute --file \".notes\\pg\\mockupdata-v3.sql\" && npx prisma db pull && npx prisma generate && npm run addadmin && npm run dev"
   },
   "dependencies": {
     "@apollo/server": "^5.4.0",
