@@ -8,14 +8,6 @@ A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the `dat
 """
 scalar DateTime
 
-input DelLogsInput {
-  deleted_by: Int
-  effected_by: String
-  note: String
-  record: String!
-  table_name: String!
-}
-
 type DelLogsType {
   created_at: DateTime!
   del_logs: DelLogsType
@@ -27,14 +19,6 @@ type DelLogsType {
   record: String!
   table_name: String!
   users: UsersType
-}
-
-input MaterialInput {
-  material_type_id: Int!
-  minimum_threshold: Int
-  quantity: Int! = 0
-  title: String!
-  unit: String!
 }
 
 type MaterialType {
@@ -50,33 +34,12 @@ type MaterialType {
   updated_at: DateTime!
 }
 
-input MaterialTypeInput {
-  title: String!
-}
-
 type MaterialTypeType {
   created_at: DateTime!
   id: Int!
   material: [MaterialType!]
   title: String!
   updated_at: DateTime!
-}
-
-input MrFormInput {
-  authorizer_id: Int
-  creator_id: Int!
-  description: String
-  owner_id: Int!
-  purpose: String
-  ref_no: String!
-  status: Int! = 0
-  subject: String!
-}
-
-input MrFormMaterialInput {
-  material_id: Int!
-  mr_form_id: Int!
-  quantity: Int!
 }
 
 type MrFormMaterialType {
@@ -107,53 +70,13 @@ type MrFormType {
   users_mr_form_creator_idTousers: UsersType
 }
 
-type Mutation {
-  createDelLog(input: DelLogsInput!): DelLogsType!
-  createMaterial(input: MaterialInput!): MaterialType!
-  createMaterialType(input: MaterialTypeInput!): MaterialTypeType!
-  createMrForm(input: MrFormInput!): MrFormType!
-  createMrFormMaterial(input: MrFormMaterialInput!): MrFormMaterialType!
-  createUser(input: UsersInput!): UsersType!
-  deleteDelLog(id: String!): Boolean!
-  deleteMaterial(id: Int!): Boolean!
-  deleteMaterialType(id: Int!): Boolean!
-  deleteMrForm(id: Int!): Boolean!
-  deleteMrFormMaterial(id: Int!): Boolean!
-  deleteUser(id: Int!): Boolean!
-  updateMaterial(id: Int!, input: MaterialInput!): MaterialType!
-  updateMaterialType(id: Int!, input: MaterialTypeInput!): MaterialTypeType!
-  updateMrForm(id: Int!, input: MrFormInput!): MrFormType!
-  updateMrFormMaterial(id: Int!, input: MrFormMaterialInput!): MrFormMaterialType!
-  updateUser(id: Int!, input: UsersInput!): UsersType!
-}
-
 type Query {
   getDelLogs: [DelLogsType!]!
-  getDelLogsById(id: String!): DelLogsType
-  getDelLogsByTableName(table_name: String!): [DelLogsType!]!
-  getMaterialById(id: Int!): MaterialType
-  getMaterialTypeById(id: Int!): MaterialTypeType
   getMaterialTypes: [MaterialTypeType!]!
   getMaterials: [MaterialType!]!
-  getMaterialsByMrFormId(mr_form_id: Int!): [MrFormMaterialType!]!
-  getMrFormById(id: Int!): MrFormType
-  getMrFormByRefNo(ref_no: String!): MrFormType
-  getMrFormMaterialById(id: Int!): MrFormMaterialType
   getMrFormMaterials: [MrFormMaterialType!]!
   getMrForms: [MrFormType!]!
-  getUserById(id: Int!): UsersType
-  getUserByUsername(username: String!): UsersType
   getUsers: [UsersType!]!
-}
-
-input UsersInput {
-  display_name: String
-  email: String
-  fullname: String!
-  position: String!
-  role: Int! = 0
-  status: Int! = 0
-  username: String
 }
 
 type UsersType {

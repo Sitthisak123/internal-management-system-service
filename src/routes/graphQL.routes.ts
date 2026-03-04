@@ -2,6 +2,7 @@ import 'reflect-metadata';
 import { buildSchema } from 'type-graphql';
 import { Express, json } from 'express';
 import { ApolloServer } from '@apollo/server';
+import { authenticateToken } from '../middleware/auth.middleware';
 import {
   AllResolvers,
   MaterialTypeType,
@@ -67,7 +68,7 @@ export async function setupGraphQL(app: Express): Promise<ApolloServer> {
   };
 
   // Mount the GraphQL handler with explicit JSON parsing
-  app.post('/graphql', json(), handler);
+  app.post('/graphql', json(), authenticateToken, handler);
   
   // Handle GET requests for GraphQL Sandbox/Playground IDE
   app.get('/graphql', (req, res) => {
