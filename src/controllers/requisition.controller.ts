@@ -307,6 +307,70 @@ export const getRequisitionVolume = async (req: Request, res: Response) => {
   }
 };
 
+export const evaluateForm = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const { status, authorizer_id } = req.body;
+
+  try {
+    const result = await prisma.$transaction(async (tx) => {
+      // 1. Get the original requisition with its materials
+      const originalForm = await tx.mr_form.findUnique({
+        where: { id: Number(id) },
+        include: {
+          mr_form_materials: true,
+        },
+      });
+
+      if (!originalForm) {
+        throw new Error('Requisition not found');
+      }
+
+      // 2. Update the form status and authorizer
+      const updatedForm = await tx.mr_form.update({
+        where: { id: Number(id) },
+        data: {
+          status: Number(status),
+          authorizer_id: Number(authorizer_id),
+          evaluated_at: new Date(),
+        },
+      });
+
+      // 3. If status is approved (1), update material quantities
+      if (status === 1 && originalForm.mr_form_materials.length > 0) {
+        for (const item of originalForm.mr_form_materials) {
+          const material = await tx.material.findUnique({
+            where: { id: item.material_id },
+          });
+
+          if (!material) {
+            throw new Error(`Material with ID ${item.material_id} not found`);
+          }
+
+          if (material.quantity < item.quantity) {
+            throw new Error(`Not enough stock for material: ${material.title}`);
+          }
+
+          await tx.material.update({
+            where: { id: item.material_id },
+            data: {
+              quantity: {
+                decrement: item.quantity,
+              },
+            },
+          });
+        }
+      }
+
+      return updatedForm;
+    });
+
+    res.json(result);
+  } catch (error: any) {
+    console.error("Error evaluating requisition:", error);
+    res.status(500).json({ message: error.message || 'Internal server error' });
+  }
+};
+
 
 
 

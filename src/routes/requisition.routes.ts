@@ -8,7 +8,8 @@ import {
   deleteRequisition,
   getRequisitionVolume,
   getCountFilteredByStatus,
-  getRecentActivities
+  getRecentActivities,
+  evaluateForm
 } from '../controllers/requisition.controller'; 
 import { authenticateToken } from '../middleware/auth.middleware';
 
@@ -21,6 +22,7 @@ router.get('/statusCount/:status', authenticateToken, getCountFilteredByStatus);
 router.get('/:id', authenticateToken, getRequisitionById);
 router.post('/', authenticateToken, createRequisition);
 router.put('/:id', authenticateToken, updateRequisition);
+router.put('/:id/evaluate', authenticateToken, evaluateForm);
 router.delete('/:id', authenticateToken, deleteRequisition);
 
 export default router;
