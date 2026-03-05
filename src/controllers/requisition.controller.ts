@@ -121,9 +121,14 @@ export const getAllRequisitions = async (req: Request, res: Response) => {
     const cleanRequisitions = rawRequisitions.map(mapToCleanRequisition);
 
     res.json(cleanRequisitions);
-  } catch (error) {
-    console.error("Error getting requisitions:", error);
-    res.status(500).json({ message: 'Internal server error' });
+  } catch (error: any) {
+    if (error.code === 'P1008') {
+      console.error('Database timeout. Please check your database connection string and ensure the database is running.');
+      res.status(500).json({ message: 'Database timeout. Please check your database connection string and ensure the database is running.' });
+    } else {
+      console.error("Error getting requisitions:", error);
+      res.status(500).json({ message: 'Internal server error' });
+    }
   }
 };
 
@@ -172,6 +177,17 @@ export const createRequisition = async (req: Request, res: Response) => {
   try {
     const ref_no = `MR-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
 
+    // Merge items with the same material_id
+    const mergedItems = new Map<number, { quantity: number }>();
+    for (const item of items) {
+      const material_id = Number(item.material_id);
+      if (mergedItems.has(material_id)) {
+        mergedItems.get(material_id)!.quantity += Number(item.quantity);
+      } else {
+        mergedItems.set(material_id, { quantity: Number(item.quantity) });
+      }
+    }
+
     const requisition = await prisma.mr_form.create({
       data: {
         ref_no,
@@ -183,9 +199,9 @@ export const createRequisition = async (req: Request, res: Response) => {
         owner_id: Number(owner_id),
         creator_id: Number(creator_id),
         mr_form_materials: {
-          create: items.map((item: any) => ({
-            material_id: Number(item.material_id),
-            quantity: Number(item.quantity),
+          create: Array.from(mergedItems.entries()).map(([material_id, { quantity }]) => ({
+            material_id,
+            quantity,
           })),
         },
       },
@@ -195,9 +211,14 @@ export const createRequisition = async (req: Request, res: Response) => {
     });
 
     res.status(201).json(requisition);
-  } catch (error) {
-    console.error("Error creating requisition:", error);
-    res.status(500).json({ message: 'Internal server error' });
+  } catch (error: any) {
+    if (error.code === 'P2002') {
+      console.error("Error creating requisition: Unique constraint failed. This likely means you are trying to add the same material to the same requisition twice. Please merge the items in your request.", error);
+      res.status(400).json({ message: 'Unique constraint failed. Please make sure you are not adding the same material to the same requisition twice.' });
+    } else {
+      console.error("Error creating requisition:", error);
+      res.status(500).json({ message: 'Internal server error' });
+    }
   }
 };
 

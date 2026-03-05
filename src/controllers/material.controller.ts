@@ -16,9 +16,14 @@ export const getAllMaterials = async (req: Request, res: Response) => {
       include: { material_type: true, },
     });
     res.json(materials);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Internal server error' });
+  } catch (error: any) {
+    if (error.code === 'P1008') {
+      console.error('Database timeout. Please check your database connection string and ensure the database is running.');
+      res.status(500).json({ message: 'Database timeout. Please check your database connection string and ensure the database is running.' });
+    } else {
+      console.error(error);
+      res.status(500).json({ message: 'Internal server error' });
+    }
   }
 };
 

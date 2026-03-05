@@ -3,6 +3,7 @@
     - Add create By <UserID> on Ceatting New Personnel/User 
     - Requisitions(Page) > Owner(Field) > AllUser
     - First Row of Data Table > No. or ID
+    - MT table QTY. DT > Float
 
 
 - delation:
@@ -12,6 +13,9 @@
 
 - edit:
     <!-- - Requisitions -->
+    - MR-FORM
+        -MT.filter > MT not in MR-FORM
+        -MT.delete > Rebase UI
     - MT
         -add QTY. btn
         -
