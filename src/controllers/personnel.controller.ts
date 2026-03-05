@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import createPrismaClient, { withAuditLog } from '../utils/db'; // Removed .ts extension for standard import
+import createPrismaClient, { withAuditLog, withUpdateLog } from '../utils/db'; // Removed .ts extension for standard import
 import { equal } from 'node:assert';
 import { stat } from 'node:fs';
 
@@ -137,18 +137,24 @@ export const createPersonnel = async (req: Request, res: Response) => {
 
 export const updatePersonnel = async (req: Request, res: Response) => {
   const { id } = req.params;
+  const userId = (req as any).user?.id;
+  const { note, ...updateData } = req.body ?? {};
+  const updateNote = note || 'Personnel updated via API';
   try {
-    const personnel = await prisma.users.update({
-      where: { id: Number(id) },
-      data: req.body,
-      select: {
-        id: true,
-        fullname: true,
-        position: true,
-        email: true,
-        updated_at: true
-      }
+    const personnel = await withUpdateLog(prisma, userId, updateNote, async (tx) => {
+      return tx.users.update({
+        where: { id: Number(id) },
+        data: updateData,
+        select: {
+          id: true,
+          fullname: true,
+          position: true,
+          email: true,
+          updated_at: true
+        }
+      });
     });
+
     res.json(personnel);
   } catch (error) {
     console.error("Error updating personnel:", error);

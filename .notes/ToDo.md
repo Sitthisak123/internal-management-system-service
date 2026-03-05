@@ -20,8 +20,11 @@
         <!-- -add QTY. btn -->
 
     - ALL table
-        - update_at
-        - update logs
+        <!-- - update_at -->
+        <!-- - update logs -->
+    -Nav > User info do not update in realtime
+    -NAv > Zindex of Logut btn is low than Material Directory > Search Box
+
 
 - UI:
     - Global Search: (later)
@@ -48,7 +51,7 @@
 
 
 -Errs-Fallback:
-    -Api fallback
+    <!-- -Api fallback -->
     -
 
 
@@ -59,7 +62,7 @@
     _________________________________________________
         - Optional:
             - Logs page (SAdmin only)
-            - Creste/Edits Logs Table
+    <!-- - Creste/Edits Logs Table -->
             - TestCase Script
 
 

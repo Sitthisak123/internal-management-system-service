@@ -74,26 +74,27 @@ model mr_form_materials {
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 model users {
-  id                                   Int        @id @default(autoincrement())
-  username                             String?    @unique
+  id                                   Int           @id @default(autoincrement())
+  username                             String?       @unique
   hash_pwd                             String?
   display_name                         String?
-  fullname                             String     @unique
+  fullname                             String        @unique
   position                             String
-  email                                String?    @unique
+  email                                String?       @unique
   workplace_id                         Int?
-  role                                 Int        @default(0) @db.SmallInt
-  status                               Int        @default(0) @db.SmallInt
+  role                                 Int           @default(0) @db.SmallInt
+  status                               Int           @default(0) @db.SmallInt
   created_by                           Int?
-  created_at                           DateTime   @default(now()) @db.Timestamptz(6)
-  updated_at                           DateTime   @default(now()) @db.Timestamptz(6)
+  created_at                           DateTime      @default(now()) @db.Timestamptz(6)
+  updated_at                           DateTime      @default(now()) @db.Timestamptz(6)
   del_logs                             del_logs[]
-  mr_form_mr_form_authorizer_idTousers mr_form[]  @relation("mr_form_authorizer_idTousers")
-  mr_form_mr_form_creator_idTousers    mr_form[]  @relation("mr_form_creator_idTousers")
+  mr_form_mr_form_authorizer_idTousers mr_form[]     @relation("mr_form_authorizer_idTousers")
+  mr_form_mr_form_creator_idTousers    mr_form[]     @relation("mr_form_creator_idTousers")
   mr_form                              mr_form[]
-  workplace                            workplace? @relation(fields: [workplace_id], references: [id], onUpdate: NoAction, map: "fk_users_workplace")
-  created_by_user                      users?     @relation("users_created_by", fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  users_created_by                     users[]    @relation("users_created_by")
+  update_logs                          update_logs[]
+  workplace                            workplace?    @relation(fields: [workplace_id], references: [id], onUpdate: NoAction, map: "fk_users_workplace")
+  created_by_user                      users?        @relation("users_created_by", fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users_created_by                     users[]       @relation("users_created_by")
 
   @@index([created_by], map: "idx_users_created_by")
   @@index([workplace_id], map: "idx_users_workplace_id")
@@ -122,4 +123,20 @@ model workplace {
   created_at DateTime @default(now()) @db.Timestamptz(6)
   updated_at DateTime @default(now()) @db.Timestamptz(6)
   users      users[]
+}
+
+model update_logs {
+  id             BigInt   @id @default(autoincrement())
+  table_name     String
+  old_record     Json
+  new_record     Json
+  changed_fields String[] @default([])
+  updated_by     Int?
+  note           String?
+  created_at     DateTime @default(now()) @db.Timestamptz(6)
+  users          users?   @relation(fields: [updated_by], references: [id], onUpdate: NoAction)
+
+  @@index([created_at], map: "idx_update_logs_created_at")
+  @@index([table_name], map: "idx_update_logs_table_name")
+  @@index([updated_by], map: "idx_update_logs_updated_by")
 }

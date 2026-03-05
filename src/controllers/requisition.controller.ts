@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import createPrismaClient, { withAuditLog } from '../utils/db';
+import createPrismaClient, { withAuditLog, withUpdateLog } from '../utils/db';
 
 const prisma = createPrismaClient();
 
@@ -224,6 +224,7 @@ export const createRequisition = async (req: Request, res: Response) => {
 
 export const updateRequisition = async (req: Request, res: Response) => {
   const { id } = req.params;
+  const userId = (req as any).user?.id;
   const {
     subject,
     description,
@@ -234,9 +235,10 @@ export const updateRequisition = async (req: Request, res: Response) => {
     items,
     authorizer_id
   } = req.body;
+  const note = req.body?.note || 'Requisition updated via API';
 
   try {
-    const result = await prisma.$transaction(async (tx) => {
+    const result = await withUpdateLog(prisma, userId, note, async (tx) => {
       // 1. Delete existing materials
       await tx.mr_form_materials.deleteMany({
         where: { mr_form_id: Number(id) },
@@ -331,9 +333,12 @@ export const getRequisitionVolume = async (req: Request, res: Response) => {
 export const evaluateForm = async (req: Request, res: Response) => {
   const { id } = req.params;
   const { status, authorizer_id } = req.body;
+  const userId = (req as any).user?.id;
+  const note = req.body?.note || 'Requisition evaluated via API';
+  const numericStatus = Number(status);
 
   try {
-    const result = await prisma.$transaction(async (tx) => {
+    const result = await withUpdateLog(prisma, userId, note, async (tx) => {
       // 1. Get the original requisition with its materials
       const originalForm = await tx.mr_form.findUnique({
         where: { id: Number(id) },
@@ -350,14 +355,14 @@ export const evaluateForm = async (req: Request, res: Response) => {
       const updatedForm = await tx.mr_form.update({
         where: { id: Number(id) },
         data: {
-          status: Number(status),
+          status: numericStatus,
           authorizer_id: Number(authorizer_id),
           evaluated_at: new Date(),
         },
       });
 
       // 3. If status is approved (1), update material quantities
-      if (status === 1 && originalForm.mr_form_materials.length > 0) {
+      if (numericStatus === 1 && originalForm.mr_form_materials.length > 0) {
         for (const item of originalForm.mr_form_materials) {
           const material = await tx.material.findUnique({
             where: { id: item.material_id },
