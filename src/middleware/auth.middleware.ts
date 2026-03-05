@@ -14,7 +14,6 @@ export const authenticateToken = (req: Request, res: Response, next: NextFunctio
       return res.sendStatus(403);
     }
     (req as any).user = user;
-    console.log("Authenticated user:", user);
     next();
   });
 };

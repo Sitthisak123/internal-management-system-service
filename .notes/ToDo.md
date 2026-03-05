@@ -2,7 +2,8 @@
     <!-- - create_by INTEGER REFERENCES users(id) ON DELETE SET users(id), -- Self-referencing for creator (can be NULL for initial records) -->
     - Add create By <UserID> on Ceatting New Personnel/User 
     - Requisitions(Page) > Owner(Field) > AllUser
-    - 
+    - First Row of Data Table > No. or ID
+
 
 - delation:
     <!-- - Inventory (Materials) -->
@@ -11,6 +12,10 @@
 
 - edit:
     <!-- - Requisitions -->
+    - MT
+        -add QTY. btn
+        -
+
     - ALL table
         - update_at
         - update logs
@@ -53,3 +58,5 @@
             - Logs page (SAdmin only)
             - Creste/Edits Logs Table
             - TestCase Script
+
+
