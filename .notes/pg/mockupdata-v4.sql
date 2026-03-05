@@ -1,35 +1,49 @@
 -- =========================
--- 1. INSERT USERS (Merged with Personnel info)
+-- 1. INSERT WORKPLACES
 -- =========================
-INSERT INTO users (username, hash_pwd, display_name, fullname, position, email, role, status, created_by) VALUES
-('somchai.j', '$2b$10$mockhash1', 'Mr.', 'Somchai Jaidee', 'Warehouse Officer', 'somchai.j@company.com', 1, 1, NULL),
-('anong.s', '$2b$10$mockhash2', 'Ms.', 'Anong Srisuk', 'Procurement Officer', 'anong.s@company.com', 0, 1, 1),
-('kittipong.m', '$2b$10$mockhash3', 'Mr.', 'Kittipong Manee', 'Maintenance Technician', 'kittipong.m@company.com', 0, 1, 1),
-('suda.k', '$2b$10$mockhash4', 'Ms.', 'Suda Kanchana', 'Admin Officer', 'suda.k@company.com', 0, 1, 1),
-('prasert.b', '$2b$10$mockhash5', 'Mr.', 'Prasert Boonmee', 'Store Keeper', 'prasert.b@company.com', 0, 1, 1),
-('nattapong.s', '$2b$10$mockhash6', 'Mr.', 'Nattapong Saelim', 'IT Support', 'nattapong.s@company.com', 1, 1, 1),
-('chalida.w', '$2b$10$mockhash7', 'Ms.', 'Chalida Wongsa', 'HR Officer', 'chalida.w@company.com', 0, 1, 1),
-('wichai.t', '$2b$10$mockhash8', 'Mr.', 'Wichai Thonglor', 'Site Engineer', 'wichai.t@company.com', 0, 1, 1),
-('patcharee.m', '$2b$10$mockhash9', 'Ms.', 'Patcharee Meesuk', 'Accountant', 'patcharee.m@company.com', 0, 1, 1),
-('thanakorn.p', '$2b$10$mockhash10', 'Mr.', 'Thanakorn Preecha', 'Project Coordinator', 'thanakorn.p@company.com', 0, 1, 1),
-('orathai.c', '$2b$10$mockhash11', 'Ms.', 'Orathai Charoen', 'Office Manager', 'orathai.c@company.com', 1, 1, 1),
-('ekkasit.l', '$2b$10$mockhash12', 'Mr.', 'Ekkasit Lertchai', 'Safety Officer', 'ekkasit.l@company.com', 0, 1, 1),
-('supaporn.i', '$2b$10$mockhash13', 'Ms.', 'Supaporn Intanon', 'Document Control', 'supaporn.i@company.com', 0, 1, 1),
-('chaiwat.r', '$2b$10$mockhash14', 'Mr.', 'Chaiwat Rattanakul', 'Logistics Officer', 'chaiwat.r@company.com', 0, 1, 1),
-('siriporn.p', '$2b$10$mockhash15', 'Ms.', 'Siriporn Phasuk', 'Procurement Assistant', 'siriporn.p@company.com', 0, 1, 1),
-('narongdet.p', '$2b$10$mockhash16', 'Mr.', 'Narongdet Phanich', 'Technician', 'narongdet.p@company.com', 0, 1, 1),
-('kamonwan.y', '$2b$10$mockhash17', 'Ms.', 'Kamonwan Yindee', 'Finance Officer', 'kamonwan.y@company.com', 0, 1, 1),
-('sompong.k', '$2b$10$mockhash18', 'Mr.', 'Sompong Klaisri', 'Driver', 'sompong.k@company.com', 0, 1, 1),
-('benjamas.t', '$2b$10$mockhash19', 'Ms.', 'Benjamas Thida', 'Engineer', 'benjamas.t@company.com', 0, 1, 1),
-('peerawat.c', '$2b$10$mockhash20', 'Mr.', 'Peerawat Chokdee', 'Supervisor', 'peerawat.c@company.com', 1, 1, 1),
-('lalita.s', '$2b$10$mockhash21', 'Ms.', 'Lalita Sanguan', 'Admin Assistant', 'lalita.s@company.com', 0, 1, 1),
-('rungroj.t', '$2b$10$mockhash22', 'Mr.', 'Rungroj Tantisiri', 'Store Supervisor', 'rungroj.t@company.com', 0, 1, 1),
-('pimchanok.s', '$2b$10$mockhash23', 'Ms.', 'Pimchanok Seangdao', 'Planner', 'pimchanok.s@company.com', 0, 1, 1),
-('thawatchai.a', '$2b$10$mockhash24', 'Mr.', 'Thawatchai Arun', 'Electrician', 'thawatchai.a@company.com', 0, 1, 1),
-('duangkamol.p', '$2b$10$mockhash25', 'Ms.', 'Duangkamol Phrom', 'Coordinator', 'duangkamol.p@company.com', 0, 1, 1);
+INSERT INTO workplace (building, room) VALUES
+('Main Office', '101'),
+('Main Office', '102'),
+('Main Office', '201'),
+('Main Office', '202'),
+('Warehouse A', 'A1'),
+('Warehouse A', 'Office'),
+('Warehouse B', 'B1'),
+('Site Office', 'Meeting Room'),
+('Site Office', 'Engineer Station');
 
 -- =========================
--- 2. INSERT MATERIAL TYPES
+-- 2. INSERT USERS (Merged with Personnel info)
+-- =========================
+INSERT INTO users (username, hash_pwd, display_name, fullname, position, email, role, status, created_by, workplace_id) VALUES
+('somchai.j', '$2b$10$mockhash1', 'Mr.', 'Somchai Jaidee', 'Warehouse Officer', 'somchai.j@company.com', 1, 1, NULL, 5),
+('anong.s', '$2b$10$mockhash2', 'Ms.', 'Anong Srisuk', 'Procurement Officer', 'anong.s@company.com', 0, 1, 1, 1),
+('kittipong.m', '$2b$10$mockhash3', 'Mr.', 'Kittipong Manee', 'Maintenance Technician', 'kittipong.m@company.com', 0, 1, 1, 9),
+('suda.k', '$2b$10$mockhash4', 'Ms.', 'Suda Kanchana', 'Admin Officer', 'suda.k@company.com', 0, 1, 1, 2),
+('prasert.b', '$2b$10$mockhash5', 'Mr.', 'Prasert Boonmee', 'Store Keeper', 'prasert.b@company.com', 0, 1, 1, 7),
+('nattapong.s', '$2b$10$mockhash6', 'Mr.', 'Nattapong Saelim', 'IT Support', 'nattapong.s@company.com', 1, 1, 1, 3),
+('chalida.w', '$2b$10$mockhash7', 'Ms.', 'Chalida Wongsa', 'HR Officer', 'chalida.w@company.com', 0, 1, 1, 2),
+('wichai.t', '$2b$10$mockhash8', 'Mr.', 'Wichai Thonglor', 'Site Engineer', 'wichai.t@company.com', 0, 1, 1, 9),
+('patcharee.m', '$2b$10$mockhash9', 'Ms.', 'Patcharee Meesuk', 'Accountant', 'patcharee.m@company.com', 0, 1, 1, 4),
+('thanakorn.p', '$2b$10$mockhash10', 'Mr.', 'Thanakorn Preecha', 'Project Coordinator', 'thanakorn.p@company.com', 0, 1, 1, 8),
+('orathai.c', '$2b$10$mockhash11', 'Ms.', 'Orathai Charoen', 'Office Manager', 'orathai.c@company.com', 1, 1, 1, 1),
+('ekkasit.l', '$2b$10$mockhash12', 'Mr.', 'Ekkasit Lertchai', 'Safety Officer', 'ekkasit.l@company.com', 0, 1, 1, NULL),
+('supaporn.i', '$2b$10$mockhash13', 'Ms.', 'Supaporn Intanon', 'Document Control', 'supaporn.i@company.com', 0, 1, 1, 2),
+('chaiwat.r', '$2b$10$mockhash14', 'Mr.', 'Chaiwat Rattanakul', 'Logistics Officer', 'chaiwat.r@company.com', 0, 1, 1, 6),
+('siriporn.p', '$2b$10$mockhash15', 'Ms.', 'Siriporn Phasuk', 'Procurement Assistant', 'siriporn.p@company.com', 0, 1, 1, 1),
+('narongdet.p', '$2b$10$mockhash16', 'Mr.', 'Narongdet Phanich', 'Technician', 'narongdet.p@company.com', 0, 1, 1, NULL),
+('kamonwan.y', '$2b$10$mockhash17', 'Ms.', 'Kamonwan Yindee', 'Finance Officer', 'kamonwan.y@company.com', 0, 1, 1, 4),
+('sompong.k', '$2b$10$mockhash18', 'Mr.', 'Sompong Klaisri', 'Driver', 'sompong.k@company.com', 0, 1, 1, NULL),
+('benjamas.t', '$2b$10$mockhash19', 'Ms.', 'Benjamas Thida', 'Engineer', 'benjamas.t@company.com', 0, 1, 1, 9),
+('peerawat.c', '$2b$10$mockhash20', 'Mr.', 'Peerawat Chokdee', 'Supervisor', 'peerawat.c@company.com', 1, 1, 1, NULL),
+('lalita.s', '$2b$10$mockhash21', 'Ms.', 'Lalita Sanguan', 'Admin Assistant', 'lalita.s@company.com', 0, 1, 1, 2),
+('rungroj.t', '$2b$10$mockhash22', 'Mr.', 'Rungroj Tantisiri', 'Store Supervisor', 'rungroj.t@company.com', 0, 1, 1, 7),
+('pimchanok.s', '$2b$10$mockhash23', 'Ms.', 'Pimchanok Seangdao', 'Planner', 'pimchanok.s@company.com', 0, 1, 1, 8),
+('thawatchai.a', '$2b$10$mockhash24', 'Mr.', 'Thawatchai Arun', 'Electrician', 'thawatchai.a@company.com', 0, 1, 1, NULL),
+('duangkamol.p', '$2b$10$mockhash25', 'Ms.', 'Duangkamol Phrom', 'Coordinator', 'duangkamol.p@company.com', 0, 1, 1, 8);
+
+-- =========================
+-- 3. INSERT MATERIAL TYPES
 -- =========================
 INSERT INTO material_type (title) VALUES
 ('Electrical'),
@@ -39,7 +53,7 @@ INSERT INTO material_type (title) VALUES
 ('Safety Equipment');
 
 -- =========================
--- 3. INSERT MATERIALS
+-- 4. INSERT MATERIALS
 -- =========================
 INSERT INTO material (title, material_type_id, unit, quantity) VALUES
 ('Electric Cable 2x1.5', 1, 'roll', 50),
@@ -69,9 +83,9 @@ INSERT INTO material (title, material_type_id, unit, quantity) VALUES
 ('Voltage Tester', 1, 'piece', 30);
 
 -- =========================
--- 4. INSERT FORMS (MR)
+-- 5. INSERT FORMS (MR)
 -- =========================
--- Note: owner_id now references users(id). 
+-- Note: owner_id now references users(id).
 -- Since we inserted users in the same order as the old personnel list, IDs 1-25 match.
 INSERT INTO mr_form (ref_no, subject, description, purpose, status, creator_id, owner_id, authorizer_id, evaluated_at) VALUES
 ('MR-2026-001', 'Request Electrical Supplies', 'For site wiring work', 'New project setup', 1, 2, 8, 1, NOW()),
@@ -83,10 +97,10 @@ INSERT INTO mr_form (ref_no, subject, description, purpose, status, creator_id, 
 ('MR-2026-007', 'Project Site Materials', 'Initial stock', 'Project startup', 1, 10, 19, 11, NOW()),
 ('MR-2026-008', 'Admin Supplies', 'Files and pens', 'Office admin', 0, 21, 4, NULL, NULL),
 ('MR-2026-009', 'Electrical Maintenance', 'Breaker replacements', 'Routine maintenance', 1, 8, 3, 1, NOW()),
-('MR-2026-010', 'Safety Refill', 'Replace worn PPE', 'Safety restock', -1, 12, 12, 6, NOW());
+('MR-2026-10', 'Safety Refill', 'Replace worn PPE', 'Safety restock', -1, 12, 12, 6, NOW());
 
 -- =========================
--- 5. INSERT FORM ITEMS
+-- 6. INSERT FORM ITEMS
 -- =========================
 INSERT INTO mr_form_materials (mr_form_id, material_id, quantity) VALUES
 (1, 1, 5),

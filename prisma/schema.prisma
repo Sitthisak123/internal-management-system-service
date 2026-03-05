@@ -13,8 +13,8 @@ model material {
   title             String
   material_type_id  Int
   unit              String
-  minimum_threshold Int?
-  quantity          Int                 @default(0)
+  minimum_threshold Float?
+  quantity          Float               @default(0)
   created_at        DateTime            @default(now()) @db.Timestamptz(6)
   updated_at        DateTime            @default(now()) @db.Timestamptz(6)
   material_type     material_type       @relation(fields: [material_type_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
@@ -81,6 +81,7 @@ model users {
   fullname                             String     @unique
   position                             String
   email                                String?    @unique
+  workplace_id                         Int?
   role                                 Int        @default(0) @db.SmallInt
   status                               Int        @default(0) @db.SmallInt
   created_by                           Int?
@@ -90,10 +91,12 @@ model users {
   mr_form_mr_form_authorizer_idTousers mr_form[]  @relation("mr_form_authorizer_idTousers")
   mr_form_mr_form_creator_idTousers    mr_form[]  @relation("mr_form_creator_idTousers")
   mr_form                              mr_form[]
+  workplace                            workplace? @relation(fields: [workplace_id], references: [id], onUpdate: NoAction, map: "fk_users_workplace")
   created_by_user                      users?     @relation("users_created_by", fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
   users_created_by                     users[]    @relation("users_created_by")
 
   @@index([created_by], map: "idx_users_created_by")
+  @@index([workplace_id], map: "idx_users_workplace_id")
 }
 
 model del_logs {
@@ -110,4 +113,13 @@ model del_logs {
 
   @@index([effected_by], map: "idx_del_logs_effected_by")
   @@index([table_name], map: "idx_del_logs_table_name")
+}
+
+model workplace {
+  id         Int      @id @default(autoincrement())
+  building   String
+  room       String?
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  updated_at DateTime @default(now()) @db.Timestamptz(6)
+  users      users[]
 }

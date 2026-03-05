@@ -1,9 +1,9 @@
 - intigration:
     <!-- - create_by INTEGER REFERENCES users(id) ON DELETE SET users(id), -- Self-referencing for creator (can be NULL for initial records) -->
     - Add create By <UserID> on Ceatting New Personnel/User 
-    - Requisitions(Page) > Owner(Field) > AllUser
-    - First Row of Data Table > No. or ID
-    - MT table QTY. DT > Float
+    - Requisitions(Page) > Owner(Field) > no filter AllUser API
+    <!-- - First Row of Data Table > No. or ID -->
+    <!-- - MT table QTY. DT > Float -->
 
 
 - delation:
@@ -14,11 +14,10 @@
 - edit:
     <!-- - Requisitions -->
     - MR-FORM
-        -MT.filter > MT not in MR-FORM
-        -MT.delete > Rebase UI
+        <!-- -MT.filter > MT not in MR-FORM -->
+        <!-- -MT.delete > Rebase UI -->
     - MT
         -add QTY. btn
-        -
 
     - ALL table
         - update_at
@@ -33,12 +32,12 @@
     -
 -Page:
     - Requisition:
-        * Accept / Reject Button
+        <!-- * Accept / Reject Button -->
         * Form Validate font/back end
-        * Filter Search   
-        * Material Eval on Accept
+        <!-- * Filter Search    -->
+        <!-- * Material Eval on Accept -->
     - Users:
-        * Action button > View, Edit 
+        <!-- * Action button > View, Edit  -->
         * 
     - CreateUser:
         * 
@@ -54,7 +53,7 @@
 
 
 - functional:
-    - Inventory (Materials): Full search, Filters by(date, itemID, TypeID, UserID, Status), Analyzes,
+    <!-- - Inventory (Materials): Full search, Filters by(date, itemID, TypeID, UserID, Status), Analyzes, -->
     - Logout (Bottom-Left Cornor)
     - Additional Language (Thai, English)
     _________________________________________________

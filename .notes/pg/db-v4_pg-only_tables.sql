@@ -10,6 +10,7 @@ CREATE TABLE users (
   fullname TEXT NOT NULL UNIQUE, -- Moved from personnel
   position TEXT NOT NULL,        -- Moved from personnel
   email TEXT UNIQUE DEFAULT NULL, -- Nullable for personnel-only records
+  workplace_id INTEGER,
   -- Role & Status with Named Constraints
   role SMALLINT NOT NULL DEFAULT 0,
   -- -1=personnel (only records/no login), 0=admin/user, 1=superadmin
@@ -44,9 +45,9 @@ CREATE TABLE material (
   title TEXT NOT NULL,
   material_type_id INTEGER NOT NULL REFERENCES material_type(id),
   unit TEXT NOT NULL, 
-  minimum_threshold INTEGER DEFAULT NULL,
+  minimum_threshold FLOAT DEFAULT NULL,
   
-  quantity INTEGER NOT NULL DEFAULT 0,
+  quantity FLOAT NOT NULL DEFAULT 0,
   CONSTRAINT chk_material_qty CHECK (quantity >= 0), 
   
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -102,6 +103,21 @@ CREATE TABLE mr_form_materials (
 
 CREATE INDEX idx_mrfm_form_id ON mr_form_materials(mr_form_id);
 CREATE INDEX idx_mrfm_material_id ON mr_form_materials(material_id);
+
+-- =========================
+-- TABLE: workplace
+-- =========================
+CREATE TABLE workplace (
+  id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  building TEXT NOT NULL,
+  room TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- After creating workplace table, add foreign key to users table.
+ALTER TABLE users ADD CONSTRAINT fk_users_workplace FOREIGN KEY (workplace_id) REFERENCES workplace(id) ON DELETE SET NULL;
+CREATE INDEX idx_users_workplace_id ON users(workplace_id);
 
 -- =========================
 -- NEW TABLE: del_logs (Audit System)
@@ -200,6 +216,9 @@ CREATE TRIGGER trg_log_mr_form_delete BEFORE DELETE ON mr_form FOR EACH ROW EXEC
 -- mr_form_materials (No updated_at needed here based on original, just deletion logging)
 CREATE TRIGGER trg_log_mr_form_materials_delete BEFORE DELETE ON mr_form_materials FOR EACH ROW EXECUTE FUNCTION log_deletion();
 
+-- workplace
+CREATE TRIGGER trg_workplace_updated BEFORE UPDATE ON workplace FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+CREATE TRIGGER trg_log_workplace_delete BEFORE DELETE ON workplace FOR EACH ROW EXECUTE FUNCTION log_deletion();
 
 -- =========================
 -- VIEW: vw_nested_deletion_logs

@@ -11,6 +11,7 @@ import personnelRoutes from './routes/personnel.routes.js';
 import materialRoutes from './routes/material.routes.js';
 import materialTypeRoutes from './routes/material_type.routes.js';
 import requisitionRoutes from './routes/requisition.routes.js';
+import workplaceRoutes from './routes/workplace.routes.js';
 
 const prisma = createPrismaClient();
 const app = express();
@@ -24,6 +25,7 @@ app.use('/api/personnel', personnelRoutes);
 app.use('/api/materials', materialRoutes);
 app.use('/api/requisitions', requisitionRoutes);
 app.use('/api/material-types', materialTypeRoutes);
+app.use('/api/workplaces', workplaceRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.get('/', (req, res) => {
