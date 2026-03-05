@@ -17,7 +17,7 @@
         <!-- -MT.filter > MT not in MR-FORM -->
         <!-- -MT.delete > Rebase UI -->
     - MT
-        -add QTY. btn
+        <!-- -add QTY. btn -->
 
     - ALL table
         - update_at

@@ -5,6 +5,7 @@ import {
     getMaterialDistribution,
     createMaterial, 
     updateMaterial, 
+    addMaterialQuantity,
     deleteMaterial
 } from '../controllers/material.controller.js';
 import { authenticateToken } from '../middleware/auth.middleware.js';
@@ -15,6 +16,7 @@ router.get('/', authenticateToken, getAllMaterials);
 router.get('/distribution', authenticateToken, getMaterialDistribution);
 router.get('/:id', authenticateToken, getMaterialById);
 router.post('/', authenticateToken, createMaterial);
+router.patch('/:id/add-qty', authenticateToken, addMaterialQuantity);
 router.put('/:id', authenticateToken, updateMaterial);
 router.delete('/:id', authenticateToken, deleteMaterial);
 

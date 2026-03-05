@@ -95,6 +95,50 @@ export const updateMaterial = async (req: Request, res: Response) => {
   }
 };
 
+export const addMaterialQuantity = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const addValueRaw = req.body?.add_value;
+  const addValue = Number(addValueRaw);
+  const materialId = Number(id);
+
+  if (!Number.isInteger(materialId) || materialId <= 0) {
+    return res.status(400).json({ message: 'Invalid material id' });
+  }
+
+  if (!Number.isInteger(addValue) || addValue <= 0) {
+    return res.status(400).json({ message: 'add_value must be a positive integer' });
+  }
+
+  try {
+    const updatedMaterial = await prisma.material.update({
+      where: { id: materialId },
+      data: {
+        quantity: {
+          increment: addValue,
+        },
+      },
+      include: { material_type: true },
+    });
+
+    // Old value for this request can be derived from the returned quantity.
+    const newValue = updatedMaterial.quantity;
+    const lastValue = newValue - addValue;
+
+    res.json({
+      material: updatedMaterial,
+      last_value: lastValue,
+      add_value: addValue,
+      new_value: newValue,
+    });
+  } catch (error: any) {
+    if (error.code === 'P2025') {
+      return res.status(404).json({ message: 'Material not found' });
+    }
+    console.error('Error adding material quantity:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
 export const deleteMaterial = async (req: Request, res: Response) => {
   const { id } = req.params;
   const userId = (req as any).user?.id;

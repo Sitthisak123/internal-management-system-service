@@ -1,3 +1,4 @@
+import { workplace } from './../../prisma/generated/prisma/models/workplace';
 import { Request, Response } from 'express';
 import createPrismaClient, { withAuditLog } from '../utils/db.ts'
 import bcrypt from 'bcryptjs';
@@ -70,7 +71,7 @@ export const createUser = async (req: Request, res: Response) => {
 
 export const updateUser = async (req: Request, res: Response) => {
   const { id } = req.params;
-  const { username, display_name, fullname, position, email, role, status, password } = req.body;
+  const { username, display_name, fullname, position, email, role, status, password, workplace_id } = req.body;
   try {
     const data: any = {
       username,
@@ -80,6 +81,7 @@ export const updateUser = async (req: Request, res: Response) => {
       email,
       role,
       status,
+      workplace_id,
     };
 
     if (password) {

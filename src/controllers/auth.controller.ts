@@ -81,14 +81,24 @@ export const getMe = async (req: Request, res: Response) => {
         id: true,
         username: true,
         email: true,
-        display_name: true,
+        role: true,
         fullname: true,
         position: true,
-        role: true,
+        display_name: true,
         status: true,
-        created_at: true
-      }
+        created_at: true,
+        updated_at: true,
+        workplace_id: true,
+        workplace: {
+          select: {
+            id: true,
+            building: true,
+            room: true,
+          },
+        },
+      },
     });
+
 
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
