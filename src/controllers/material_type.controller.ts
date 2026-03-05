@@ -1,5 +1,5 @@
 import  { Request, Response } from 'express';
-import createPrismaClient, { withAuditLog } from '../utils/db.js';
+import createPrismaClient, { withUpdateLog } from '../utils/db.js';
 
 const prisma = createPrismaClient();
 
@@ -46,14 +46,19 @@ export const createMaterialType = async (req: Request, res: Response) => {
 
 export const updateMaterialType = async (req: Request, res: Response) => {
   const { id } = req.params;
+  const userId = (req as any).user?.id;
   const { title } = req.body;
+  const note = req.body?.note || 'Material type updated via API';
   try {
-    const updatedMaterialType = await prisma.material_type.update({
-      where: { id: Number(id) },
-      data: {
-        title,
-      },
+    const updatedMaterialType = await withUpdateLog(prisma, userId, note, async (tx) => {
+      return tx.material_type.update({
+        where: { id: Number(id) },
+        data: {
+          title,
+        },
+      });
     });
+
     res.json(updatedMaterialType);
   } catch (error) {
     res.status(500).json({ error: 'Failed to update material type' });

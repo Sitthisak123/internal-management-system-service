@@ -1,6 +1,5 @@
-import { workplace } from './../../prisma/generated/prisma/models/workplace';
 import { Request, Response } from 'express';
-import createPrismaClient, { withAuditLog } from '../utils/db.ts'
+import createPrismaClient, { withAuditLog, withUpdateLog } from '../utils/db.ts'
 import bcrypt from 'bcryptjs';
 
 const prisma = createPrismaClient();
@@ -71,7 +70,9 @@ export const createUser = async (req: Request, res: Response) => {
 
 export const updateUser = async (req: Request, res: Response) => {
   const { id } = req.params;
+  const userId = (req as any).user?.id;
   const { username, display_name, fullname, position, email, role, status, password, workplace_id } = req.body;
+  const note = req.body?.note || 'User updated via API';
   try {
     const data: any = {
       username,
@@ -88,10 +89,13 @@ export const updateUser = async (req: Request, res: Response) => {
       data.hash_pwd = await bcrypt.hash(password, 10);
     }
 
-    const updatedUser = await prisma.users.update({
-      where: { id: Number(id) },
-      data,
+    const updatedUser = await withUpdateLog(prisma, userId, note, async (tx) => {
+      return tx.users.update({
+        where: { id: Number(id) },
+        data,
+      });
     });
+
     res.json(updatedUser);
   } catch (error) {
     res.status(500).json({ error: 'Failed to update user' });

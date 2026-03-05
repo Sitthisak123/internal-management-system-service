@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import createPrismaClient, { withAuditLog } from '../utils/db.js';
+import createPrismaClient, { withAuditLog, withUpdateLog } from '../utils/db.js';
 
 const prisma = createPrismaClient();
 
@@ -96,6 +96,8 @@ export const updateWorkplace = async (req: Request, res: Response) => {
   if (!parsedId) {
     return res.status(400).json({ error: 'Invalid workplace id' });
   }
+  const userId = (req as any).user?.id;
+  const note = req.body?.note || 'Workplace updated via API';
 
   const { building, room } = req.body ?? {};
   const data: { building?: string; room?: string | null } = {};
@@ -119,9 +121,11 @@ export const updateWorkplace = async (req: Request, res: Response) => {
   }
 
   try {
-    const workplace = await prisma.workplace.update({
-      where: { id: parsedId },
-      data,
+    const workplace = await withUpdateLog(prisma, userId, note, async (tx) => {
+      return tx.workplace.update({
+        where: { id: parsedId },
+        data,
+      });
     });
 
     res.json(workplace);

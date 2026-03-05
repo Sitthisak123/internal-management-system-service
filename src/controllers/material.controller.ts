@@ -1,7 +1,7 @@
 import { material } from './../../prisma/generated/prisma/client';
 import { material_type } from './../../prisma/generated/prisma/browser';
 import { Request, Response } from 'express';
-import createPrismaClient, { withAuditLog } from '../utils/db.ts'
+import createPrismaClient, { withAuditLog, withUpdateLog } from '../utils/db.ts'
 
 const prisma = createPrismaClient();
 function materialTypeToName(materialTypeId: number, materialTypes: material_type[]): string{
@@ -83,11 +83,17 @@ export const createMaterial = async (req: Request, res: Response) => {
 
 export const updateMaterial = async (req: Request, res: Response) => {
   const { id } = req.params;
+  const userId = (req as any).user?.id;
+  const { note, ...updateData } = req.body ?? {};
+  const updateNote = note || 'Material updated via API';
   try {
-    const material = await prisma.material.update({
-      where: { id: Number(id) },
-      data: req.body,
+    const material = await withUpdateLog(prisma, userId, updateNote, async (tx) => {
+      return tx.material.update({
+        where: { id: Number(id) },
+        data: updateData,
+      });
     });
+
     res.json(material);
   } catch (error) {
     console.error(error);
@@ -97,6 +103,8 @@ export const updateMaterial = async (req: Request, res: Response) => {
 
 export const addMaterialQuantity = async (req: Request, res: Response) => {
   const { id } = req.params;
+  const userId = (req as any).user?.id;
+  const note = req.body?.note || 'Material quantity added via API';
   const addValueRaw = req.body?.add_value;
   const addValue = Number(addValueRaw);
   const materialId = Number(id);
@@ -110,14 +118,16 @@ export const addMaterialQuantity = async (req: Request, res: Response) => {
   }
 
   try {
-    const updatedMaterial = await prisma.material.update({
-      where: { id: materialId },
-      data: {
-        quantity: {
-          increment: addValue,
+    const updatedMaterial = await withUpdateLog(prisma, userId, note, async (tx) => {
+      return tx.material.update({
+        where: { id: materialId },
+        data: {
+          quantity: {
+            increment: addValue,
+          },
         },
-      },
-      include: { material_type: true },
+        include: { material_type: true },
+      });
     });
 
     // Old value for this request can be derived from the returned quantity.

@@ -136,6 +136,26 @@ CREATE INDEX idx_del_logs_table_name ON del_logs(table_name);
 CREATE INDEX idx_del_logs_effected_by ON del_logs(effected_by);
 
 -- =========================
+-- NEW TABLE: update_logs (Audit System)
+-- =========================
+-- Tracks all UPDATE operations across business tables.
+-- Excludes del_logs by trigger design (see trigger section below).
+CREATE TABLE update_logs (
+  id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  table_name TEXT NOT NULL,
+  old_record JSONB NOT NULL,
+  new_record JSONB NOT NULL,
+  changed_fields TEXT[] NOT NULL DEFAULT ARRAY[]::TEXT[],
+  updated_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
+  note TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_update_logs_table_name ON update_logs(table_name);
+CREATE INDEX idx_update_logs_updated_by ON update_logs(updated_by);
+CREATE INDEX idx_update_logs_created_at ON update_logs(created_at);
+
+-- =========================
 -- FUNCTIONS
 -- =========================
 
@@ -193,31 +213,82 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+-- 3. AUTO Update Logging Function
+CREATE OR REPLACE FUNCTION log_update()
+RETURNS TRIGGER AS $$
+DECLARE
+  v_user_id INTEGER;
+  v_note TEXT;
+  v_changed_fields TEXT[];
+BEGIN
+  -- Extract application context variables
+  BEGIN
+      v_user_id := NULLIF(current_setting('app.current_user_id', true), '')::INTEGER;
+  EXCEPTION WHEN OTHERS THEN v_user_id := NULL;
+  END;
+
+  BEGIN
+      v_note := current_setting('app.update_note', true);
+  EXCEPTION WHEN OTHERS THEN v_note := NULL;
+  END;
+
+  -- Determine which columns changed in this update
+  SELECT array_agg(n.key ORDER BY n.key)
+  INTO v_changed_fields
+  FROM jsonb_each(to_jsonb(NEW)) AS n
+  JOIN jsonb_each(to_jsonb(OLD)) AS o USING (key)
+  WHERE n.value IS DISTINCT FROM o.value;
+
+  -- Skip log row if no field changed
+  IF v_changed_fields IS NULL OR array_length(v_changed_fields, 1) IS NULL THEN
+      RETURN NEW;
+  END IF;
+
+  INSERT INTO update_logs (table_name, old_record, new_record, changed_fields, updated_by, note)
+  VALUES (
+      TG_TABLE_NAME,
+      to_jsonb(OLD),
+      to_jsonb(NEW),
+      v_changed_fields,
+      v_user_id,
+      v_note
+  );
+
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
 -- =========================
 -- TRIGGERS (Update & Delete)
 -- =========================
 
 -- users
 CREATE TRIGGER trg_users_updated BEFORE UPDATE ON users FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+CREATE TRIGGER trg_log_users_update AFTER UPDATE ON users FOR EACH ROW EXECUTE FUNCTION log_update();
 CREATE TRIGGER trg_log_users_delete BEFORE DELETE ON users FOR EACH ROW EXECUTE FUNCTION log_deletion();
 
 -- material_type
 CREATE TRIGGER trg_material_type_updated BEFORE UPDATE ON material_type FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+CREATE TRIGGER trg_log_material_type_update AFTER UPDATE ON material_type FOR EACH ROW EXECUTE FUNCTION log_update();
 CREATE TRIGGER trg_log_material_type_delete BEFORE DELETE ON material_type FOR EACH ROW EXECUTE FUNCTION log_deletion();
 
 -- material
 CREATE TRIGGER trg_material_updated BEFORE UPDATE ON material FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+CREATE TRIGGER trg_log_material_update AFTER UPDATE ON material FOR EACH ROW EXECUTE FUNCTION log_update();
 CREATE TRIGGER trg_log_material_delete BEFORE DELETE ON material FOR EACH ROW EXECUTE FUNCTION log_deletion();
 
 -- mr_form
 CREATE TRIGGER trg_mr_form_updated BEFORE UPDATE ON mr_form FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+CREATE TRIGGER trg_log_mr_form_update AFTER UPDATE ON mr_form FOR EACH ROW EXECUTE FUNCTION log_update();
 CREATE TRIGGER trg_log_mr_form_delete BEFORE DELETE ON mr_form FOR EACH ROW EXECUTE FUNCTION log_deletion();
 
 -- mr_form_materials (No updated_at needed here based on original, just deletion logging)
+CREATE TRIGGER trg_log_mr_form_materials_update AFTER UPDATE ON mr_form_materials FOR EACH ROW EXECUTE FUNCTION log_update();
 CREATE TRIGGER trg_log_mr_form_materials_delete BEFORE DELETE ON mr_form_materials FOR EACH ROW EXECUTE FUNCTION log_deletion();
 
 -- workplace
 CREATE TRIGGER trg_workplace_updated BEFORE UPDATE ON workplace FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+CREATE TRIGGER trg_log_workplace_update AFTER UPDATE ON workplace FOR EACH ROW EXECUTE FUNCTION log_update();
 CREATE TRIGGER trg_log_workplace_delete BEFORE DELETE ON workplace FOR EACH ROW EXECUTE FUNCTION log_deletion();
 
 -- =========================
