@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import createPrismaClient, { withAuditLog } from '../utils/db'; // Removed .ts extension
+import createPrismaClient, { withUpdateLog } from '../utils/db'; // Removed .ts extension
 
 const prisma = createPrismaClient();
 
@@ -16,14 +16,20 @@ export interface UserPayload {
 
 export const login = async (req: Request, res: Response) => {
   const { email, password } = req.body;
+  const loginId = typeof email === 'string' ? email.trim() : '';
 
-  if (!email || !password) {
-    return res.status(400).json({ message: 'Email and password are required' });
+  if (!loginId || !password) {
+    return res.status(400).json({ message: 'Username/Email and password are required' });
   }
 
   try {
-    const user = await prisma.users.findUnique({
-      where: { email },
+    const user = await prisma.users.findFirst({
+      where: {
+        OR: [
+          { email: { equals: loginId, mode: 'insensitive' } },
+          { username: { equals: loginId, mode: 'insensitive' } },
+        ],
+      },
     });
 
     if (!user) {
@@ -31,6 +37,10 @@ export const login = async (req: Request, res: Response) => {
     }
 
     // Compare provided password with stored hash
+    if (!user.hash_pwd) {
+      return res.status(401).json({ message: 'Invalid credentials' });
+    }
+
     const isPasswordValid = await bcrypt.compare(password, user.hash_pwd);
 
     if (!isPasswordValid) {
@@ -61,6 +71,85 @@ export const login = async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error("Login error:", error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+export const resetPassword = async (req: Request, res: Response) => {
+  const requester = (req as any).user;
+  const requesterId = Number(requester?.id);
+  const requesterRole = Number(requester?.role);
+
+  if (!requesterId || Number.isNaN(requesterId)) {
+    return res.status(401).json({ message: 'Unauthorized' });
+  }
+
+  const { target_user_id, current_password, new_password, note } = req.body ?? {};
+  const targetUserId = target_user_id ? Number(target_user_id) : requesterId;
+  const isSelfReset = targetUserId === requesterId;
+  const isSuperAdmin = requesterRole === 1;
+
+  if (!Number.isInteger(targetUserId) || targetUserId <= 0) {
+    return res.status(400).json({ message: 'target_user_id must be a positive integer' });
+  }
+
+  if (typeof new_password !== 'string' || new_password.length < 6) {
+    return res.status(400).json({ message: 'new_password must be at least 6 characters' });
+  }
+
+  if (!isSelfReset && !isSuperAdmin) {
+    return res.status(403).json({ message: 'Only superAdmin can reset other users passwords' });
+  }
+
+  try {
+    const targetUser = await prisma.users.findUnique({
+      where: { id: targetUserId },
+      select: {
+        id: true,
+        hash_pwd: true,
+      },
+    });
+
+    if (!targetUser) {
+      return res.status(404).json({ message: 'Target user not found' });
+    }
+
+    if (isSelfReset) {
+      if (typeof current_password !== 'string' || current_password.length === 0) {
+        return res.status(400).json({ message: 'current_password is required for self reset' });
+      }
+
+      if (!targetUser.hash_pwd) {
+        return res.status(400).json({ message: 'Current password is not set for this account' });
+      }
+
+      const isCurrentPasswordValid = await bcrypt.compare(current_password, targetUser.hash_pwd);
+      if (!isCurrentPasswordValid) {
+        return res.status(401).json({ message: 'Current password is incorrect' });
+      }
+    }
+
+    const hash_pwd = await bcrypt.hash(new_password, 10);
+    const updateNote = note || (
+      isSelfReset
+        ? 'Password reset by self via API'
+        : `Password reset by superAdmin via API for user ${targetUserId}`
+    );
+
+    await withUpdateLog(prisma, requesterId, updateNote, async (tx) => {
+      await tx.users.update({
+        where: { id: targetUserId },
+        data: { hash_pwd },
+      });
+    });
+
+    res.json({
+      message: 'Password reset successful',
+      target_user_id: targetUserId,
+      reset_mode: isSelfReset ? 'self' : 'superAdmin',
+    });
+  } catch (error) {
+    console.error('Reset password error:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 };

@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import createPrismaClient, { withAuditLog, withUpdateLog } from '../utils/db'; // Removed .ts extension for standard import
-import { equal } from 'node:assert';
-import { stat } from 'node:fs';
+// import { equal } from 'node:assert';
+// import { stat } from 'node:fs';
 
 const prisma = createPrismaClient();
 
@@ -11,7 +11,7 @@ export const getAllPersonnel = async (req: Request, res: Response) => {
     // We select specific fields to avoid returning the password hash.
     const personnelList = await prisma.users.findMany({
       where: {
-        status: { not: -1 },// Filter for personnel (role = -1)
+        status: { not: -1 },// Filter out suspended personnel/user (status = -1)
       },
       select: {
         id: true,

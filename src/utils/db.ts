@@ -17,7 +17,7 @@ export default function createPrismaClient(): PrismaClient {
             throw new Error('DATABASE_URL is not set. Please check your .env file.');
         }
         console.log(`Connecting to database at ${new URL(connectionString).host}`);
-        const pool = new Pool({ connectionString, ssl: { rejectUnauthorized: false } })
+        const pool = new Pool({ connectionString,  })
         const adapter = new PrismaPg(pool)
         prismaClient = new PrismaClient({ adapter }) // ⭐ จำเป็นใน v7
         return prismaClient

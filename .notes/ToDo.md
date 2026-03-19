@@ -22,8 +22,8 @@
     - ALL table
         <!-- - update_at -->
         <!-- - update logs -->
-    -Nav > User info do not update in realtime
-    -NAv > Zindex of Logut btn is low than Material Directory > Search Box
+    <!-- -Nav > User info do not update in realtime -->
+    <!-- -NAv > Zindex of Logut btn is low than Material Directory > Search Box -->
 
 
 - UI:
@@ -64,5 +64,16 @@
             - Logs page (SAdmin only)
     <!-- - Creste/Edits Logs Table -->
             - TestCase Script
+
+
+Role Rules Guards:
+    -1: personnel = N/A
+    0: admin/User = Edit(All table exclude(Users.role != -1) and Can't reset password in Edit User page, cant not change self users exclude(Display name, Job Position, Workplace))
+    1: SuperAdmin = Edit(All table, Can reset password in Edit User page)
+
+    -Create User > implement Role Guard
+
+
+
 
 
